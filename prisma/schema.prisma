@@ -1,0 +1,62 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  authId    String   @unique
+  firstName String?
+  lastName  String?
+  domains   Domain[]
+  notifications Notification[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Domain {
+  id               String   @id @default(uuid())
+  name             String   @unique
+  userId           String
+  user             User     @relation(fields: [userId], references: [id])
+  expirationDate   DateTime
+  sslCertificates  SSLCertificate[]
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model SSLCertificate {
+  id             String   @id @default(uuid())
+  domainId       String
+  domain         Domain   @relation(fields: [domainId], references: [id])
+  expirationDate DateTime
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Notification {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  message    String
+  type       NotificationType
+  status     NotificationStatus
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+enum NotificationType {
+  DOMAIN_EXPIRATION
+  SSL_EXPIRATION
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+}
