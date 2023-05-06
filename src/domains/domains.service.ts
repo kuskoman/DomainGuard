@@ -1,6 +1,7 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Global, Injectable, NotFoundException } from '@nestjs/common';
 import { DbService } from '@src/db/db.service';
 
+@Global()
 @Injectable()
 export class DomainsService {
   constructor(private readonly db: DbService) {}

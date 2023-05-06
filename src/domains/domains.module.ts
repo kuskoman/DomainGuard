@@ -4,6 +4,6 @@ import { DomainsExpirationModule } from './domains-expiration/domains-expiration
 
 @Module({
   providers: [DomainsService],
-  imports: [DomainsExpirationModule]
+  imports: [DomainsExpirationModule],
 })
 export class DomainsModule {}
