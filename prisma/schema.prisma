@@ -35,12 +35,12 @@ model Domain {
 }
 
 model SSLCertificate {
-  id             String   @id @default(uuid())
-  domainId       String   @map("domain_id")
-  domain         Domain   @relation(fields: [domainId], references: [id])
-  expirationDate DateTime @map("expiration_date")
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @updatedAt @map("updated_at")
+  id             String    @id @default(uuid())
+  domainId       String    @map("domain_id")
+  domain         Domain    @relation(fields: [domainId], references: [id])
+  expirationDate DateTime? @map("expiration_date")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
 
   @@map("ssl_certificates")
 }
