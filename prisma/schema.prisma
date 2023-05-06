@@ -8,55 +8,67 @@ generator client {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  authId    String   @unique
-  firstName String?
-  lastName  String?
-  domains   Domain[]
+  id            String         @id @default(uuid())
+  email         String         @unique
+  authId        String         @unique @map("auth_id")
+  firstName     String?        @map("first_name")
+  lastName      String?        @map("last_name")
+  domains       Domain[]
   notifications Notification[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+
+  @@map("users")
 }
 
 model Domain {
-  id               String   @id @default(uuid())
-  name             String   @unique
-  userId           String
-  user             User     @relation(fields: [userId], references: [id])
-  expirationDate   DateTime
-  sslCertificates  SSLCertificate[]
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  id              String           @id @default(uuid())
+  name            String           @unique
+  userId          String           @map("user_id")
+  user            User             @relation(fields: [userId], references: [id])
+  expirationDate  DateTime         @map("expiration_date")
+  sslCertificates SSLCertificate[]
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
+
+  @@map("domains")
 }
 
 model SSLCertificate {
   id             String   @id @default(uuid())
-  domainId       String
+  domainId       String   @map("domain_id")
   domain         Domain   @relation(fields: [domainId], references: [id])
-  expirationDate DateTime
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  expirationDate DateTime @map("expiration_date")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@map("ssl_certificates")
 }
 
 model Notification {
-  id         String   @id @default(uuid())
-  userId     String
-  user       User     @relation(fields: [userId], references: [id])
-  message    String
-  type       NotificationType
-  status     NotificationStatus
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id        String             @id @default(uuid())
+  userId    String             @map("user_id")
+  user      User               @relation(fields: [userId], references: [id])
+  message   String
+  type      NotificationType
+  status    NotificationStatus
+  createdAt DateTime           @default(now()) @map("created_at")
+  updatedAt DateTime           @updatedAt @map("updated_at")
+
+  @@map("notifications")
 }
 
 enum NotificationType {
   DOMAIN_EXPIRATION
   SSL_EXPIRATION
+
+  @@map("notification_types")
 }
 
 enum NotificationStatus {
   PENDING
   SENT
   FAILED
+
+  @@map("notification_statuses")
 }
