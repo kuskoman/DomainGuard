@@ -29,3 +29,29 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  redis:
+    image: redis:7.0.9-alpine
+    restart: unless-stopped
+    ports:
+      - '${REDIS_PORT:-6379}:6379'
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    restart: unless-stopped
+    environment:
+      REDIS_HOSTS: 'redis'
+    depends_on:
+      - redis
+    ports:
+      - '${REDIS_COMMANDER_PORT:-8081}:8081'
+    healthcheck:
+      test: ['CMD', '/redis-commander/bin/healthcheck.js']
+      interval: 10s
+      timeout: 5s
+      retries: 5
