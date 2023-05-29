@@ -59,7 +59,7 @@ export class DomainsService {
     });
   }
 
-  public async updateExpirationDate(id: string, userId: string) {
+  public async updateDomainExpirationDate(id: string, userId: string) {
     const domain = await this.db.domain.findUnique({
       where: {
         id,

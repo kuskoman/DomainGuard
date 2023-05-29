@@ -63,7 +63,7 @@ describe(DomainsService.name, () => {
     });
 
     it('should update the expiration date of a domain for a user', async () => {
-      const result = await service.updateExpirationDate(testDomain.id, testDomain.userId);
+      const result = await service.updateDomainExpirationDate(testDomain.id, testDomain.userId);
       expect(result).toEqual(testExpirationDateDomain);
       expect(mockDbService.domain.findUnique).toHaveBeenCalledWith({ where: { id: testDomain.id } });
       expect(mockExpirationService.getExpirationDate).toHaveBeenCalledWith(testDomain.name);
@@ -75,13 +75,15 @@ describe(DomainsService.name, () => {
 
     it('should throw NotFoundException when domain is not found or user id does not match', async () => {
       mockDbService.domain.findUnique.mockResolvedValueOnce(null);
-      await expect(service.updateExpirationDate(testDomain.id, 'wrong-user-id')).rejects.toThrow(NotFoundException);
+      await expect(service.updateDomainExpirationDate(testDomain.id, 'wrong-user-id')).rejects.toThrow(
+        NotFoundException,
+      );
       expect(mockDbService.domain.findUnique).toHaveBeenCalledWith({ where: { id: testDomain.id } });
     });
 
     it('should throw HttpException when could not get the expiration date', async () => {
       mockExpirationService.getExpirationDate.mockResolvedValueOnce(null);
-      await expect(service.updateExpirationDate(testDomain.id, testDomain.userId)).rejects.toThrow(HttpException);
+      await expect(service.updateDomainExpirationDate(testDomain.id, testDomain.userId)).rejects.toThrow(HttpException);
       expect(mockDbService.domain.findUnique).toHaveBeenCalledWith({ where: { id: testDomain.id } });
       expect(mockExpirationService.getExpirationDate).toHaveBeenCalledWith(testDomain.name);
     });
