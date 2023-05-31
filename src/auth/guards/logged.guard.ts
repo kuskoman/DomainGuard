@@ -15,7 +15,7 @@ export class LoggedGuard implements CanActivate {
 
     try {
       const payload = this.encryptionService.verify<AuthJwtPayload>(token);
-      request.user = payload;
+      request.userId = payload.sub;
     } catch (e) {
       this.logger.error('Error while verifying token');
       this.logger.error(e);

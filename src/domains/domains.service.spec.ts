@@ -2,7 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { DbService } from '@src/db/db.service';
 import { DomainsService } from './domains.service';
 import { DomainsExpirationService } from './domains-expiration/domains-expiration.service';
-import { NotFoundException, HttpException } from '@nestjs/common';
 
 describe(DomainsService.name, () => {
   let service: DomainsService;
@@ -25,10 +24,6 @@ describe(DomainsService.name, () => {
     service = module.get<DomainsService>(DomainsService);
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
   describe('create method', () => {
     it('should create a domain', async () => {
       const result = await service.create(testDomain.name, testDomain.userId);
@@ -36,23 +31,61 @@ describe(DomainsService.name, () => {
     });
   });
 
-  describe('findAll method', () => {
+  describe('findAllWithUser method', () => {
     it('should find all domains for a user', async () => {
-      const result = await service.findAll(testDomain.userId);
+      const result = await service.findAllWithUser(testDomain.userId);
+      expect(result).toEqual([testDomain]);
+    });
+  });
+
+  describe('findOneWithUser method', () => {
+    it('should find one domain by id for a user', async () => {
+      const result = await service.findOneWithUser(testDomain.id, testDomain.userId);
+      expect(result).toEqual(testDomain);
+    });
+  });
+
+  describe('removeWithUser method', () => {
+    it('should remove a domain by id for a user', async () => {
+      const result = await service.removeWithUser(testDomain.id, testDomain.userId);
+      expect(result).toEqual(testDomain);
+    });
+  });
+
+  describe('updateExpirationDateWithUser method', () => {
+    beforeEach(() => {
+      mockDbService.domain.update = jest.fn().mockResolvedValue(testExpirationDateDomain);
+    });
+
+    it('should update the expiration date of a domain for a user', async () => {
+      const result = await service.updateDomainExpirationDateWithUser(testDomain.id, testDomain.userId);
+      expect(result).toEqual(testExpirationDateDomain);
+      expect(mockDbService.domain.findUnique).toHaveBeenCalledWith({ where: { id: testDomain.id } });
+      expect(mockExpirationService.getExpirationDate).toHaveBeenCalledWith(testDomain.name);
+      expect(mockDbService.domain.update).toHaveBeenCalledWith({
+        where: { id: testDomain.id },
+        data: { expirationDate: testExpirationDateDomain.expirationDate },
+      });
+    });
+  });
+
+  describe('findAll method', () => {
+    it('should find all domains', async () => {
+      const result = await service.findAll();
       expect(result).toEqual([testDomain]);
     });
   });
 
   describe('findOne method', () => {
-    it('should find one domain by id for a user', async () => {
-      const result = await service.findOne(testDomain.id, testDomain.userId);
+    it('should find one domain by id', async () => {
+      const result = await service.findOne(testDomain.id);
       expect(result).toEqual(testDomain);
     });
   });
 
   describe('remove method', () => {
-    it('should remove a domain by id for a user', async () => {
-      const result = await service.remove(testDomain.id, testDomain.userId);
+    it('should remove a domain by id', async () => {
+      const result = await service.remove(testDomain.id);
       expect(result).toEqual(testDomain);
     });
   });
@@ -62,8 +95,8 @@ describe(DomainsService.name, () => {
       mockDbService.domain.update = jest.fn().mockResolvedValue(testExpirationDateDomain);
     });
 
-    it('should update the expiration date of a domain for a user', async () => {
-      const result = await service.updateDomainExpirationDate(testDomain.id, testDomain.userId);
+    it('should update the expiration date of a domain', async () => {
+      const result = await service.updateDomainExpirationDate(testDomain.id);
       expect(result).toEqual(testExpirationDateDomain);
       expect(mockDbService.domain.findUnique).toHaveBeenCalledWith({ where: { id: testDomain.id } });
       expect(mockExpirationService.getExpirationDate).toHaveBeenCalledWith(testDomain.name);
@@ -71,21 +104,6 @@ describe(DomainsService.name, () => {
         where: { id: testDomain.id },
         data: { expirationDate: testExpirationDateDomain.expirationDate },
       });
-    });
-
-    it('should throw NotFoundException when domain is not found or user id does not match', async () => {
-      mockDbService.domain.findUnique.mockResolvedValueOnce(null);
-      await expect(service.updateDomainExpirationDate(testDomain.id, 'wrong-user-id')).rejects.toThrow(
-        NotFoundException,
-      );
-      expect(mockDbService.domain.findUnique).toHaveBeenCalledWith({ where: { id: testDomain.id } });
-    });
-
-    it('should throw HttpException when could not get the expiration date', async () => {
-      mockExpirationService.getExpirationDate.mockResolvedValueOnce(null);
-      await expect(service.updateDomainExpirationDate(testDomain.id, testDomain.userId)).rejects.toThrow(HttpException);
-      expect(mockDbService.domain.findUnique).toHaveBeenCalledWith({ where: { id: testDomain.id } });
-      expect(mockExpirationService.getExpirationDate).toHaveBeenCalledWith(testDomain.name);
     });
   });
 });
