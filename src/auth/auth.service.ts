@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { EncryptionService } from '@src/encryption/encryption.service';
 import { UsersService } from '@src/users/users.service';
+import { AuthJwtPayload } from './auth.interfaces';
 
 @Injectable()
 export class AuthService {
@@ -19,7 +20,8 @@ export class AuthService {
   }
 
   public async login(user: User) {
-    const payload = { email: user.email, sub: user.id };
-    return { access_token: this.encryptionService.sign(payload) };
+    const payload: AuthJwtPayload = { email: user.email, sub: user.id };
+    const token = this.encryptionService.sign(payload);
+    return { access_token: token };
   }
 }

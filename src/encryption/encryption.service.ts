@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import { JwtPayload } from './encryption.interfaces';
 
 @Injectable()
 export class EncryptionService {
@@ -14,11 +15,11 @@ export class EncryptionService {
     return bcrypt.compare(password, hashedPassword);
   }
 
-  public sign(payload: Record<string, unknown>): string {
+  public sign<T extends object = JwtPayload>(payload: T): string {
     return this.jwtService.sign(payload);
   }
 
-  public verify(token: string): Record<string, unknown> {
+  public verify<T extends object = JwtPayload>(token: string): T {
     return this.jwtService.verify(token);
   }
 }
