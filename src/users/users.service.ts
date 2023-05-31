@@ -14,8 +14,9 @@ export class UsersService {
       throw new BadRequestException('User with this email already exists');
     }
 
-    const passwordDigest = await this.encryptionService.hashPassword(userInput.password);
-    const userData: Prisma.UserCreateInput = { ...userInput, passwordDigest };
+    const { password, ...restOfUser } = userInput;
+    const passwordDigest = await this.encryptionService.hashPassword(password);
+    const userData: Prisma.UserCreateInput = { ...restOfUser, passwordDigest };
 
     return this.db.user.create({ data: userData });
   }

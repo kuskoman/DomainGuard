@@ -1,18 +1,59 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
+import { UsersService } from '@src/users/users.service';
+import { EncryptionService } from '@src/encryption/encryption.service';
+import { User } from '@prisma/client';
 import { AuthService } from './auth.service';
 
-describe('AuthService', () => {
-  let service: AuthService;
+const mockUser = {
+  id: '1',
+  email: 'test@example.com',
+  passwordDigest: 'encryptedPassword',
+} as User;
+
+const mockUsersService = {
+  findUserByEmail: jest.fn().mockResolvedValue(mockUser),
+};
+
+const mockEncryptionService = {
+  comparePassword: jest.fn().mockResolvedValue(true),
+  sign: jest.fn().mockReturnValue('token'),
+};
+
+describe(AuthService.name, () => {
+  let authService: AuthService;
 
   beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [AuthService],
+    const moduleRef = await Test.createTestingModule({
+      providers: [
+        AuthService,
+        {
+          provide: UsersService,
+          useValue: mockUsersService,
+        },
+        {
+          provide: EncryptionService,
+          useValue: mockEncryptionService,
+        },
+      ],
     }).compile();
 
-    service = module.get<AuthService>(AuthService);
+    authService = moduleRef.get<AuthService>(AuthService);
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
+  describe('validateUser', () => {
+    it('should return a user when the email and password are valid', async () => {
+      await expect(authService.validateUser('test@example.com', 'password')).resolves.toEqual(mockUser);
+    });
+
+    it('should return null when the password is invalid', async () => {
+      mockEncryptionService.comparePassword.mockResolvedValue(false);
+      await expect(authService.validateUser('test@example.com', 'password')).resolves.toBeNull();
+    });
+  });
+
+  describe('login', () => {
+    it('should return an access token for the user', async () => {
+      await expect(authService.login(mockUser)).resolves.toEqual({ access_token: 'token' });
+    });
   });
 });

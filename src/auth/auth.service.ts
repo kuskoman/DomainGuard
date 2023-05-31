@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { User } from '@prisma/client';
 import { EncryptionService } from '@src/encryption/encryption.service';
 import { UsersService } from '@src/users/users.service';
 
@@ -15,5 +16,10 @@ export class AuthService {
     }
 
     return user;
+  }
+
+  public async login(user: User) {
+    const payload = { email: user.email, sub: user.id };
+    return { access_token: this.encryptionService.sign(payload) };
   }
 }

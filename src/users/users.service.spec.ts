@@ -3,7 +3,7 @@ import { UsersService } from './users.service';
 import { DbService } from '@src/db/db.service';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaPromise, User } from '@prisma/client';
-import { EncryptionModule } from '@src/encryption/encryption.module';
+import { EncryptionService } from '@src/encryption/encryption.service';
 
 describe(UsersService.name, () => {
   let service: UsersService;
@@ -19,18 +19,21 @@ describe(UsersService.name, () => {
     },
   };
 
+  const encryptionServiceMock = {
+    hashPassword: jest.fn(() => 'hashedPassword'),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [UsersService, { provide: DbService, useValue: mockDbService }],
-      imports: [EncryptionModule],
+      providers: [
+        UsersService,
+        { provide: DbService, useValue: mockDbService },
+        { provide: EncryptionService, useValue: encryptionServiceMock },
+      ],
     }).compile();
 
     service = module.get<UsersService>(UsersService);
     dbService = module.get<DbService>(DbService);
-  });
-
-  it('should be defined', () => {
-    expect(service).toBeDefined();
   });
 
   describe('createUser', () => {
@@ -48,6 +51,21 @@ describe(UsersService.name, () => {
 
       const user = await service.createUser({ email: 'test@test.com', password: 'test' });
       expect(user).toEqual({ email: 'test@test.com' });
+    });
+
+    it('should hash the password', async () => {
+      jest.spyOn(dbService.user, 'findUnique').mockResolvedValueOnce(null);
+      jest.spyOn(dbService.user, 'create').mockResolvedValueOnce({ email: 'test@test.com' } as User);
+
+      await service.createUser({ email: 'test@test.com', password: 'test' });
+      expect(encryptionServiceMock.hashPassword).toHaveBeenCalledWith('test');
+
+      expect(dbService.user.create).toHaveBeenCalledWith({
+        data: {
+          email: 'test@test.com',
+          passwordDigest: 'hashedPassword',
+        },
+      });
     });
   });
 

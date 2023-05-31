@@ -6,8 +6,16 @@ describe(baseConfig.KEY, () => {
     delete process.env.NODE_ENV;
   };
 
+  const setupEnv = () => {
+    process.env.JWT_SECRET = 'mockSecret';
+  };
+
   afterEach(() => {
     resetEnv();
+  });
+
+  beforeEach(() => {
+    setupEnv();
   });
 
   describe('port', () => {
@@ -34,6 +42,19 @@ describe(baseConfig.KEY, () => {
       process.env.NODE_ENV = 'production';
       const { swaggerEnabled } = baseConfig();
       expect(swaggerEnabled).toBeFalsy();
+    });
+  });
+
+  describe('jwtSecret', () => {
+    it('should throw error if process.env.JWT_SECRET is not set', () => {
+      delete process.env.JWT_SECRET;
+      expect(() => baseConfig()).toThrow();
+    });
+
+    it('should return the JWT_SECRET from process.env.JWT_SECRET if set', () => {
+      process.env.JWT_SECRET = 'mySecretToken';
+      const { jwtSecret } = baseConfig();
+      expect(jwtSecret).toEqual('mySecretToken');
     });
   });
 });
