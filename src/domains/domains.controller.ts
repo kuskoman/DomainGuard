@@ -3,8 +3,9 @@ import { CreateDomainDto } from './dto/createDomainDto';
 import { DomainsService } from './domains.service';
 import { LoggedGuard } from '@src/auth/guards/logged.guard';
 import { UserId } from '@src/auth/decorators/userId.decorator';
-import { ApiHeader } from '@nestjs/swagger';
+import { ApiHeader, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('domains')
 @UseGuards(LoggedGuard)
 @ApiHeader({ name: 'Authorization', description: 'JWT received from login endpoint', example: 'Bearer <Token>' })
 @Controller('domains')
