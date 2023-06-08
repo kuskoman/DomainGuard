@@ -1,4 +1,5 @@
 import { CanActivate, ExecutionContext, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { Request } from 'express';
 import { EncryptionService } from '@src/encryption/encryption.service';
 import { AuthJwtPayload } from '../auth.interfaces';
 
@@ -26,7 +27,12 @@ export class LoggedGuard implements CanActivate {
   }
 
   private extractTokenFromRequest(request: Request): string {
-    const [type, token] = request.headers.get('Authorization')?.split(' ') || [];
+    const authHeader = request?.headers?.authorization;
+    if (!authHeader) {
+      return '';
+    }
+
+    const [type, token] = authHeader.split(' ') || [];
     return type === 'Bearer' ? token : '';
   }
 }

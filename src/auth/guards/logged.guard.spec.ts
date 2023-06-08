@@ -1,28 +1,24 @@
-import { Test } from '@nestjs/testing';
-import { ExecutionContext } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
+import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { LoggedGuard } from './logged.guard';
-import { AuthJwtPayload } from '../auth.interfaces';
 import { EncryptionService } from '@src/encryption/encryption.service';
+import { AuthJwtPayload } from '../auth.interfaces';
 
 describe(LoggedGuard.name, () => {
   let loggedGuard: LoggedGuard;
-  let encryptionService: EncryptionService;
 
   beforeEach(async () => {
-    const module = await Test.createTestingModule({
+    const module: TestingModule = await Test.createTestingModule({
       providers: [
         LoggedGuard,
         {
           provide: EncryptionService,
-          useValue: {
-            verify: jest.fn(),
-          },
+          useValue: encryptionServiceMock,
         },
       ],
     }).compile();
 
     loggedGuard = module.get<LoggedGuard>(LoggedGuard);
-    encryptionService = module.get<EncryptionService>(EncryptionService);
   });
 
   it('should be defined', () => {
@@ -30,23 +26,24 @@ describe(LoggedGuard.name, () => {
   });
 
   it('should allow a request with a valid token', async () => {
+    const request = {
+      headers: {
+        authorization: 'Bearer token',
+      },
+    };
+
     const context = {
       switchToHttp: () => ({
-        getRequest: () => ({
-          headers: {
-            get: () => 'Bearer token',
-          },
-          user: {},
-        }),
+        getRequest: () => request,
       }),
     } as unknown as ExecutionContext;
 
-    const authJwtPayload = {} as AuthJwtPayload;
+    const authJwtPayload = { sub: 'user-id' } as AuthJwtPayload;
 
-    jest.spyOn(encryptionService, 'verify').mockImplementation(() => authJwtPayload);
+    encryptionServiceMock.verify.mockImplementation(() => authJwtPayload);
 
     await expect(loggedGuard.canActivate(context)).resolves.toBe(true);
-    expect(context.switchToHttp().getRequest().user).toEqual(authJwtPayload);
+    expect((request as Record<string, unknown>).userId).toEqual(authJwtPayload.sub);
   });
 
   it('should reject a request with an invalid token', async () => {
@@ -54,31 +51,32 @@ describe(LoggedGuard.name, () => {
       switchToHttp: () => ({
         getRequest: () => ({
           headers: {
-            get: () => 'Bearer invalid',
+            authorization: 'Bearer invalid',
           },
-          user: {},
         }),
       }),
     } as unknown as ExecutionContext;
 
-    jest.spyOn(encryptionService, 'verify').mockImplementation(() => {
+    encryptionServiceMock.verify.mockImplementation(() => {
       throw new Error();
     });
 
-    await expect(loggedGuard.canActivate(context)).rejects.toThrow('Unauthorized');
+    await expect(loggedGuard.canActivate(context)).rejects.toThrow(UnauthorizedException);
   });
 
   it('should reject a request without a token', async () => {
     const context = {
       switchToHttp: () => ({
         getRequest: () => ({
-          headers: {
-            get: () => undefined,
-          },
+          headers: {},
         }),
       }),
     } as unknown as ExecutionContext;
 
-    await expect(loggedGuard.canActivate(context)).rejects.toThrow('Unauthorized');
+    await expect(loggedGuard.canActivate(context)).rejects.toThrow(UnauthorizedException);
   });
 });
+
+const encryptionServiceMock = {
+  verify: jest.fn(),
+};
