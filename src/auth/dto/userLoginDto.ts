@@ -12,7 +12,7 @@ export class UserLoginDto {
   @IsNotEmpty()
   @ApiProperty({
     description: 'Password of the user',
-    example: 'password',
+    example: 'testPassword',
   })
   readonly password!: string;
 }
