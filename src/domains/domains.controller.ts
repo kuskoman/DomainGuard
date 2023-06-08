@@ -2,6 +2,7 @@ import { Body, Controller, Logger, Post, Get, Req, UseGuards, NotFoundException 
 import { CreateDomainDto } from './dto/createDomainDto';
 import { DomainsService } from './domains.service';
 import { LoggedGuard } from '@src/auth/guards/logged.guard';
+import { UserId } from '@src/auth/decorators/userId.decorator';
 
 @Controller('domains')
 export class DomainsController {
@@ -12,9 +13,9 @@ export class DomainsController {
   // todo: create a decorator for getting user from request
   @UseGuards(LoggedGuard)
   @Post()
-  create(@Body() { name }: CreateDomainDto, @Req() req: Request & { userId: string }) {
+  create(@Body() { name }: CreateDomainDto, @UserId() userId: string) {
     this.logger.log(`Creating domain ${name}`);
-    return this.domainsService.create(name, req.userId);
+    return this.domainsService.create(name, userId);
   }
 
   @UseGuards(LoggedGuard)
