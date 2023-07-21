@@ -20,7 +20,7 @@ import {
       <v-spacer></v-spacer>
       <v-toolbar-items>
         <v-btn to="/"> Home </v-btn>
-        <v-btn to="/about"> About </v-btn>
+        <v-btn to="/register"> Register </v-btn>
       </v-toolbar-items>
     </v-app-bar>
 
