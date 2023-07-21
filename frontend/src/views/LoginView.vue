@@ -1,5 +1,5 @@
 <template>
-  <v-card class="mx-auto" max-width="344" title="User Registration">
+  <v-card class="mx-auto" max-width="344" title="User Login">
     <v-container>
       <v-text-field
         v-model="email"
@@ -23,7 +23,7 @@
     <v-card-actions>
       <v-spacer></v-spacer>
 
-      <v-btn color="success" @click="completeRegistration"> Complete Registration </v-btn>
+      <v-btn color="success" @click="completeLogin"> Login </v-btn>
     </v-card-actions>
   </v-card>
 </template>
@@ -39,14 +39,11 @@ const password = ref('')
 const userStore = useUserStore()
 const router = useRouter()
 
-const completeRegistration = async () => {
-  const registeredSuccessfully = await userStore.register({
-    email: email.value,
-    password: password.value
-  })
+const completeLogin = async () => {
+  await userStore.login({ email: email.value, password: password.value })
 
-  if (registeredSuccessfully) {
-    router.push({ name: 'login' })
+  if (userStore.isLoggedIn) {
+    router.push({ name: 'dashboard' })
   }
 }
 </script>

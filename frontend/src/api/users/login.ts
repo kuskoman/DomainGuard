@@ -7,6 +7,6 @@ export interface LoginUserPayload {
 }
 
 export const loginUser = async (input: LoginUserInput): Promise<LoginUserPayload> => {
-  const userLoginResponse = await apiClient.post<LoginUserPayload>('users/login', input)
+  const userLoginResponse = await apiClient.post<LoginUserPayload>('auth/login', input)
   return userLoginResponse.data
 }

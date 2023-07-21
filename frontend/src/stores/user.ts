@@ -40,7 +40,7 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
-  async function register(input: RegisterUserInput) {
+  async function register(input: RegisterUserInput): Promise<boolean> {
     try {
       const response: RegisterUserResponse = await registerUser(input)
 
@@ -50,6 +50,7 @@ export const useUserStore = defineStore('user', () => {
           message: 'Registration successful!',
           type: 'success'
         })
+        return true
       } else {
         throw new Error('Invalid registration response')
       }
@@ -60,6 +61,7 @@ export const useUserStore = defineStore('user', () => {
         message: 'Registration failed!',
         type: 'error'
       })
+      return false
     }
   }
 
