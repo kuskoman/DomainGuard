@@ -9,6 +9,7 @@ import {
   VBtn,
   VContainer
 } from 'vuetify/components'
+import NotificationBar from './components/NotificationBar.vue'
 </script>
 
 <template>
@@ -26,6 +27,7 @@ import {
 
     <v-main>
       <v-container>
+        <notification-bar></notification-bar>
         <router-view />
       </v-container>
     </v-main>

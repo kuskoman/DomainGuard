@@ -30,24 +30,20 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { type RegisterUserInput, registerUser } from '../api/users/register'
+import { useRouter } from 'vue-router'
+import { useUserStore } from '../stores/user'
 
 const email = ref('')
 const password = ref('')
 
-const completeRegistration = async () => {
-  const inputData: RegisterUserInput = {
-    email: email.value,
-    password: password.value
-  }
+const userStore = useUserStore()
+const router = useRouter()
 
-  try {
-    const result = await registerUser(inputData)
-    console.log(result)
-    // Navigate to another page or show success message
-  } catch (error) {
-    console.error(error)
-    // Show error message
+const completeRegistration = async () => {
+  await userStore.register({ email: email.value, password: password.value })
+
+  if (userStore.isLoggedIn) {
+    router.push({ name: 'login' })
   }
 }
 </script>
