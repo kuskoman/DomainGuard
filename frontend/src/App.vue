@@ -10,6 +10,9 @@ import {
   VContainer
 } from 'vuetify/components'
 import NotificationBar from './components/NotificationBar.vue'
+import { useUserStore } from './stores/user'
+
+const userStore = useUserStore()
 </script>
 
 <template>
@@ -21,7 +24,8 @@ import NotificationBar from './components/NotificationBar.vue'
       <v-spacer></v-spacer>
       <v-toolbar-items>
         <v-btn to="/"> Home </v-btn>
-        <v-btn to="/register"> Register </v-btn>
+        <v-btn v-if="!userStore.isLoggedIn" to="/register"> Register </v-btn>
+        <v-btn v-if="!userStore.isLoggedIn" to="/login"> Login </v-btn>
       </v-toolbar-items>
     </v-app-bar>
 
