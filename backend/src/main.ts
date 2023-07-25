@@ -10,9 +10,8 @@ const bootstrap = async () => {
   const logger = new Logger('Bootstrap');
   const app = await NestFactory.create(AppModule);
 
-  // Add this section to enable CORS
   const corsOptions: CorsOptions = {
-    origin: '*', // Change this to specific origin(s) if required
+    origin: '*',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     allowedHeaders: 'Content-Type,Authorization',
   };
