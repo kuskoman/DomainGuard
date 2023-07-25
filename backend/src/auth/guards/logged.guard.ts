@@ -11,6 +11,7 @@ export class LoggedGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromRequest(request);
     if (!token) {
+      this.logger.error(`Received request without token`);
       throw new UnauthorizedException();
     }
 

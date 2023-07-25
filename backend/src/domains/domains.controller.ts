@@ -3,7 +3,8 @@ import { CreateDomainDto } from './dto/createDomainDto';
 import { DomainsService } from './domains.service';
 import { LoggedGuard } from '@src/auth/guards/logged.guard';
 import { UserId } from '@src/auth/decorators/userId.decorator';
-import { ApiHeader, ApiTags } from '@nestjs/swagger';
+import { ApiCreatedResponse, ApiHeader, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { GetDomainDto } from './dto/getDomainDto';
 
 @ApiTags('domains')
 @UseGuards(LoggedGuard)
@@ -15,18 +16,21 @@ export class DomainsController {
   constructor(private readonly domainsService: DomainsService) {}
 
   @Post()
+  @ApiCreatedResponse({ type: GetDomainDto })
   create(@Body() { name }: CreateDomainDto, @UserId() userId: string) {
     this.logger.log(`Creating domain ${name}`);
     return this.domainsService.create(name, userId);
   }
 
   @Get()
+  @ApiOkResponse({ type: [GetDomainDto] })
   findAll(@UserId() userId: string) {
     this.logger.log(`Getting all domains for user ${userId}`);
     return this.domainsService.findAllWithUser(userId);
   }
 
   @Get(':id')
+  @ApiOkResponse({ type: GetDomainDto })
   async findOne(@UserId() userId: string, @Body() { id }: { id: string }) {
     this.logger.log(`Getting domain ${id} for user ${userId}`);
     const domain = await this.domainsService.findOneWithUser(id, userId);

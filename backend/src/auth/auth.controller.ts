@@ -1,7 +1,8 @@
 import { Body, Controller, Logger, Post, UnauthorizedException } from '@nestjs/common';
 import { UserLoginDto } from './dto/userLoginDto';
 import { AuthService } from './auth.service';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
+import { LoginResponseDto } from './dto/loginResponseDto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -9,6 +10,7 @@ export class AuthController {
   private readonly logger = new Logger(AuthController.name);
   constructor(private readonly authService: AuthService) {}
 
+  @ApiCreatedResponse({ type: LoginResponseDto })
   @Post('login')
   async login(@Body() loginDto: UserLoginDto) {
     this.logger.debug(`Login attempt for ${loginDto.email}`);
