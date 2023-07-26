@@ -12,6 +12,7 @@
         :updatedAt="domain.updatedAt"
       />
     </div>
+    <v-btn icon="mdi-plus" class="add-domain-button" color="secondary" size="64"></v-btn>
   </div>
 </template>
 
@@ -43,3 +44,11 @@ export default {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+.add-domain-button {
+  position: absolute;
+  right: 90px;
+  bottom: 90px;
+}
+</style>
