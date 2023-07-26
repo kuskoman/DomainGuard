@@ -23,6 +23,11 @@ const router = createRouter({
       path: '/dashboard',
       name: 'dashboard',
       component: () => import('../views/DomainsListView.vue')
+    },
+    {
+      path: '/dashboard/add',
+      name: 'addDomain',
+      component: () => import('../views/NewDomainView.vue')
     }
   ]
 })

@@ -12,13 +12,20 @@
         :updatedAt="domain.updatedAt"
       />
     </div>
-    <v-btn icon="mdi-plus" class="add-domain-button" color="secondary" size="64"></v-btn>
+    <v-btn
+      @click="navigateToAddDomain"
+      icon="mdi-plus"
+      class="add-domain-button"
+      color="secondary"
+      size="64"
+    ></v-btn>
   </div>
 </template>
 
 <script lang="ts">
 import { type GetDomainDto, listDomains } from '@/api/domains'
 import DomainRow from '../components/DomainRow.vue'
+import { useRouter } from 'vue-router'
 
 export default {
   components: {
@@ -38,6 +45,15 @@ export default {
         { text: 'Actions', value: 'action', sortable: false }
       ]
     }
+  },
+  setup() {
+    const router = useRouter()
+
+    const navigateToAddDomain = () => {
+      router.push({ name: 'addDomain' })
+    }
+
+    return { navigateToAddDomain }
   },
   async created() {
     this.domains = await listDomains()

@@ -14,3 +14,8 @@ export const listDomains = async (): Promise<GetDomainDto[]> => {
   const domainsListResponse = await apiClient.get('domains')
   return domainsListResponse.data
 }
+
+export const createDomain = async (domain: string): Promise<GetDomainDto> => {
+  const domainCreateResponse = await apiClient.post('domain', { name: domain })
+  return domainCreateResponse.data
+}
