@@ -65,12 +65,12 @@ export default defineConfig({
   server: {
     port: 4000,
   },
-  test: {
-    pool: "vmThreads",
-  },
   css: {
     preprocessorOptions: {
       sass: {
+        api: "modern-compiler",
+      },
+      scss: {
         api: "modern-compiler",
       },
     },

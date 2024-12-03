@@ -3,12 +3,13 @@ import { mount } from "@vue/test-utils";
 import { createTestingPinia } from "@pinia/testing";
 import { AlertType, useAlertStore } from "@/stores/alerts";
 import AlertsBar from "./AlertsBar.vue";
+import { setupVuetify } from "@/utils/testUtils";
 
 describe("AlertsBar.vue", () => {
   it("renders alerts from the store", () => {
     const wrapper = mount(AlertsBar, {
       global: {
-        plugins: [createTestingPinia({ createSpy: vi.fn })],
+        plugins: [createTestingPinia({ createSpy: vi.fn }), setupVuetify()],
       },
     });
 

@@ -8,7 +8,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     AlertsBar: typeof import('./components/generic/AlertsBar.vue')['default']
-    'AlertsBar.spec': typeof import('./components/generic/AlertsBar.spec.vue')['default']
+    'AlertsBar.spec': typeof import('./components/generic/AlertsBar.spec')['default']
     AppFooter: typeof import('./components/generic/AppFooter.vue')['default']
     HelloWorld: typeof import('./components/generic/HelloWorld.vue')['default']
     RegisterForm: typeof import('./components/auth/RegisterForm.vue')['default']
