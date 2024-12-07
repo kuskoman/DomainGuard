@@ -5,10 +5,16 @@ import { BaseConfig, baseConfig } from './config/base.config';
 import 'source-map-support/register';
 import { setupSwagger } from './swagger';
 import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
+import { NestTransportLogger, DefaultTransportConsole } from 'nest-logging-transport';
 
 const bootstrap = async () => {
-  const logger = new Logger('Bootstrap');
-  const app = await NestFactory.create(AppModule);
+  const customLogger = new NestTransportLogger({
+    transports: [new DefaultTransportConsole('DG')],
+  });
+  const app = await NestFactory.create(AppModule, {
+    logger: customLogger,
+    bufferLogs: true,
+  });
 
   const corsOptions: CorsOptions = {
     origin: '*',
@@ -24,8 +30,11 @@ const bootstrap = async () => {
     setupSwagger(app);
   }
 
+  const logger = new Logger('Bootstrap');
+
   await app.listen(port, () => {
     logger.log(`Server listening on http://localhost:${port}`);
+    swaggerEnabled && logger.log(`Swagger available on http://localhost:${port}/api`);
   });
 };
 
