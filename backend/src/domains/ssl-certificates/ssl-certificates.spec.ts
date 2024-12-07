@@ -22,7 +22,10 @@ describe(SslCertificatesService.name, () => {
         const domain = 'www.google.com';
         const expirationDate = await service.checkSslExpiration(domain);
         expect(expirationDate).toBeInstanceOf(Date);
-        expect(expirationDate!.getTime()).toBeGreaterThan(Date.now());
+
+        if (expirationDate) {
+          expect(expirationDate.getTime()).toBeGreaterThan(Date.now());
+        }
       });
     });
 

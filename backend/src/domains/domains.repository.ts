@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { DbService } from '@src/db/db.service';
 import {
   CreateDomainInput,
@@ -12,8 +12,17 @@ import {
 export class DomainsRepository {
   constructor(private readonly db: DbService) {}
 
-  public create(input: CreateDomainInput) {
+  public async create(input: CreateDomainInput) {
     const { name, userId } = input;
+
+    const existingDomain = await this.db.domain.findFirst({
+      where: { name },
+    });
+
+    if (existingDomain) {
+      throw new UnprocessableEntityException(`Domain with name ${name} already exists`);
+    }
+
     return this.db.domain.create({
       data: {
         name,
@@ -99,7 +108,7 @@ export class DomainsRepository {
 
     return this.db.domain.update({
       where: { id },
-      data: { expirationDate },
+      data: { expirationDate, lastCheckedAt: new Date() },
     });
   }
 }

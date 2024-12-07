@@ -8,6 +8,7 @@ import {
   RemoveDomainInput,
   UpdateExpirationDateInput,
 } from './domains.interfaces';
+import { UnprocessableEntityException } from '@nestjs/common';
 
 describe(DomainsRepository.name, () => {
   let repository: DomainsRepository;
@@ -57,6 +58,9 @@ describe(DomainsRepository.name, () => {
   describe('create', () => {
     it('should create a domain', async () => {
       const input: CreateDomainInput = { name: testDomain.name, userId: testDomain.userId };
+
+      mockDbService.domain.findFirst.mockResolvedValueOnce(null);
+
       const result = await repository.create(input);
       expect(result).toEqual(testDomain);
       expect(mockDbService.domain.create).toHaveBeenCalledWith({
@@ -65,6 +69,14 @@ describe(DomainsRepository.name, () => {
           user: { connect: { id: input.userId } },
         },
       });
+    });
+
+    it('should throw an error when a domain with the same name already exists', async () => {
+      const input: CreateDomainInput = { name: testDomain.name, userId: testDomain.userId };
+
+      mockDbService.domain.findFirst.mockResolvedValueOnce(testDomain);
+
+      await expect(repository.create(input)).rejects.toThrow(UnprocessableEntityException);
     });
   });
 
@@ -151,12 +163,19 @@ describe(DomainsRepository.name, () => {
 
   describe('updateExpirationDate', () => {
     it('should update a domain expiration date', async () => {
+      const mockedDate = new Date();
+      const mockedResult = { ...testDomain, lastCheckedAt: mockedDate, expirationDate: testExpirationDate };
+      mockDbService.domain.update.mockResolvedValueOnce(mockedResult);
+
       const input: UpdateExpirationDateInput = { id: testDomain.id, expirationDate: testExpirationDate };
       const result = await repository.updateExpirationDate(input);
-      expect(result).toEqual(testUpdatedDomain);
+
+      expect(result.expirationDate).toEqual(input.expirationDate);
+      expect(result.lastCheckedAt).toEqual(mockedResult.lastCheckedAt);
+
       expect(mockDbService.domain.update).toHaveBeenCalledWith({
         where: { id: input.id },
-        data: { expirationDate: input.expirationDate },
+        data: { expirationDate: input.expirationDate, lastCheckedAt: expect.any(Date) },
       });
     });
   });

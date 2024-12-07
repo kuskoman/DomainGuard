@@ -1,4 +1,4 @@
-import { HttpException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { DomainsRepository } from './domains.repository';
 import { DomainsExpirationService } from './domains-expiration/domains-expiration.service';
 import {
@@ -11,6 +11,8 @@ import {
 
 @Injectable()
 export class DomainsService {
+  private readonly logger = new Logger(DomainsService.name);
+
   constructor(
     private readonly repository: DomainsRepository,
     private readonly expirationService: DomainsExpirationService,
@@ -18,7 +20,18 @@ export class DomainsService {
 
   public async create(name: string, userId: string) {
     const input: CreateDomainInput = { name, userId };
-    return this.repository.create(input);
+    const domainResponse = await this.repository.create(input);
+
+    // todo: use a queue, or cqrs, or something else to handle this in the background
+    (async () => {
+      try {
+        await this.updateDomainExpirationDate(domainResponse.id);
+      } catch (error) {
+        this.logger.error(`Error updating domain expiration date: ${JSON.stringify(error)}`);
+      }
+    })();
+
+    return domainResponse;
   }
 
   public async findAllWithUser(userId: string) {
@@ -54,7 +67,7 @@ export class DomainsService {
 
     const expirationDate = await this.expirationService.getExpirationDate(domain.name);
     if (!expirationDate) {
-      throw new HttpException('Could not get expiration date', 424);
+      throw new UnprocessableEntityException('Could not get expiration date');
     }
 
     const updateInput: UpdateExpirationDateInput = { id, expirationDate };
@@ -93,7 +106,7 @@ export class DomainsService {
 
     const expirationDate = await this.expirationService.getExpirationDate(domain.name);
     if (!expirationDate) {
-      throw new HttpException('Could not get expiration date', 424);
+      throw new UnprocessableEntityException('Could not get expiration date');
     }
 
     const updateInput: UpdateExpirationDateInput = { id, expirationDate };

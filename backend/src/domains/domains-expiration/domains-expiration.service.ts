@@ -17,10 +17,12 @@ export class DomainsExpirationService {
     const whoisExpirationDate = whoisData.registrarRegistrationExpirationDate;
     if (!whoisExpirationDate) {
       this.logger.warn(`Could not get expiration date for domain ${domain}`);
+      this.logger.debug(`Whois data: ${JSON.stringify(whoisData)}`);
       return null;
     }
 
     const parsedExpirationDate = new Date(whoisExpirationDate);
+    this.logger.log(`Got expiration date for domain ${domain}: ${parsedExpirationDate.toISOString()}`);
     return parsedExpirationDate;
   }
 
