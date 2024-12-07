@@ -23,6 +23,7 @@ const bootstrap = async () => {
   };
   app.enableCors(corsOptions);
 
+  app.setGlobalPrefix('api');
   app.useGlobalPipes(new ValidationPipe());
   const { port, swaggerEnabled } = app.get<BaseConfig>(baseConfig.KEY);
 

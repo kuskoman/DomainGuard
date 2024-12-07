@@ -15,8 +15,8 @@ export class EncryptionService {
     return bcrypt.compare(password, hashedPassword);
   }
 
-  public sign<T extends object = JwtPayload>(payload: T): string {
-    return this.jwtService.sign(payload);
+  public sign<T extends object = JwtPayload>(payload: T, expiresIn = 3600): string {
+    return this.jwtService.sign(payload, { expiresIn });
   }
 
   public verify<T extends object = JwtPayload>(token: string): T {
