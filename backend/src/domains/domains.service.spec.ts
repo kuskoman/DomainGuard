@@ -1,135 +1,163 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { DomainsRepository } from './domains.repository';
 import { DbService } from '@src/db/db.service';
-import { DomainsService } from './domains.service';
-import { DomainsExpirationService } from './domains-expiration/domains-expiration.service';
+import {
+  CreateDomainInput,
+  FindDomainsByUserInput,
+  FindDomainInput,
+  RemoveDomainInput,
+  UpdateExpirationDateInput,
+} from './domains.interfaces';
 
-describe(DomainsService.name, () => {
-  let service: DomainsService;
+describe(DomainsRepository.name, () => {
+  let repository: DomainsRepository;
+
+  const testDomain = {
+    id: '1',
+    name: 'example.com',
+    userId: 'test-user-id',
+  };
+
+  const testExpirationDate = new Date();
+
+  const testUpdatedDomain = {
+    ...testDomain,
+    expirationDate: testExpirationDate,
+  };
+
+  const mockDbService = {
+    domain: {
+      create: jest.fn().mockResolvedValue(testDomain),
+      findMany: jest.fn().mockResolvedValue([testDomain]),
+      findFirst: jest.fn().mockResolvedValue(testDomain),
+      findUnique: jest.fn().mockResolvedValue(testDomain),
+      delete: jest.fn().mockResolvedValue(testDomain),
+      update: jest.fn().mockResolvedValue(testUpdatedDomain),
+    },
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        DomainsService,
+        DomainsRepository,
         {
           provide: DbService,
           useValue: mockDbService,
         },
-        {
-          provide: DomainsExpirationService,
-          useValue: mockExpirationService,
-        },
       ],
     }).compile();
 
-    service = module.get<DomainsService>(DomainsService);
+    repository = module.get<DomainsRepository>(DomainsRepository);
   });
 
-  describe('create method', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  describe('create', () => {
     it('should create a domain', async () => {
-      const result = await service.create(testDomain.name, testDomain.userId);
+      const input: CreateDomainInput = { name: testDomain.name, userId: testDomain.userId };
+      const result = await repository.create(input);
       expect(result).toEqual(testDomain);
-    });
-  });
-
-  describe('findAllWithUser method', () => {
-    it('should find all domains for a user', async () => {
-      const result = await service.findAllWithUser(testDomain.userId);
-      expect(result).toEqual([testDomain]);
-    });
-  });
-
-  describe('findOneWithUser method', () => {
-    it('should find one domain by id for a user', async () => {
-      const result = await service.findOneWithUser(testDomain.id, testDomain.userId);
-      expect(result).toEqual(testDomain);
-    });
-  });
-
-  describe('removeWithUser method', () => {
-    it('should remove a domain by id for a user', async () => {
-      const result = await service.removeWithUser(testDomain.id, testDomain.userId);
-      expect(result).toEqual(testDomain);
-    });
-  });
-
-  describe('updateExpirationDateWithUser method', () => {
-    beforeEach(() => {
-      mockDbService.domain.update = jest.fn().mockResolvedValue(testExpirationDateDomain);
-    });
-
-    it('should update the expiration date of a domain for a user', async () => {
-      const result = await service.updateDomainExpirationDateWithUser(testDomain.id, testDomain.userId);
-      expect(result).toEqual(testExpirationDateDomain);
-      expect(mockDbService.domain.findUnique).toHaveBeenCalledWith({ where: { id: testDomain.id } });
-      expect(mockExpirationService.getExpirationDate).toHaveBeenCalledWith(testDomain.name);
-      expect(mockDbService.domain.update).toHaveBeenCalledWith({
-        where: { id: testDomain.id },
-        data: { expirationDate: testExpirationDateDomain.expirationDate },
+      expect(mockDbService.domain.create).toHaveBeenCalledWith({
+        data: {
+          name: input.name,
+          user: { connect: { id: input.userId } },
+        },
       });
     });
   });
 
-  describe('findAll method', () => {
-    it('should find all domains', async () => {
-      const result = await service.findAll();
+  describe('findAllWithUser', () => {
+    it('should find all domains for a user', async () => {
+      const input: FindDomainsByUserInput = { userId: testDomain.userId };
+      const result = await repository.findAllWithUser(input);
       expect(result).toEqual([testDomain]);
+      expect(mockDbService.domain.findMany).toHaveBeenCalledWith({
+        where: { user: { id: input.userId } },
+      });
     });
   });
 
-  describe('findOne method', () => {
+  describe('findOneWithUser', () => {
+    it('should find one domain by id for a user', async () => {
+      const input: FindDomainInput = { id: testDomain.id, userId: testDomain.userId };
+      const result = await repository.findOneWithUser(input);
+      expect(result).toEqual(testDomain);
+      expect(mockDbService.domain.findFirst).toHaveBeenCalledWith({
+        where: { id: input.id, user: { id: input.userId } },
+      });
+    });
+
+    it('should find one domain by id when userId is not provided', async () => {
+      const input: FindDomainInput = { id: testDomain.id };
+      const result = await repository.findOneWithUser(input);
+      expect(result).toEqual(testDomain);
+      expect(mockDbService.domain.findFirst).toHaveBeenCalledWith({
+        where: { id: input.id },
+      });
+    });
+  });
+
+  describe('removeWithUser', () => {
+    it('should remove a domain by id for a user', async () => {
+      const input: RemoveDomainInput = { id: testDomain.id, userId: testDomain.userId };
+      const result = await repository.removeWithUser(input);
+      expect(result).toEqual(testDomain);
+      expect(mockDbService.domain.delete).toHaveBeenCalledWith({
+        where: { id: input.id, user: { id: input.userId } },
+      });
+    });
+
+    it('should remove a domain by id when userId is not provided', async () => {
+      const input: RemoveDomainInput = { id: testDomain.id };
+      const result = await repository.removeWithUser(input);
+      expect(result).toEqual(testDomain);
+      expect(mockDbService.domain.delete).toHaveBeenCalledWith({
+        where: { id: input.id },
+      });
+    });
+  });
+
+  describe('findAll', () => {
+    it('should find all domains', async () => {
+      const result = await repository.findAll();
+      expect(result).toEqual([testDomain]);
+      expect(mockDbService.domain.findMany).toHaveBeenCalledWith();
+    });
+  });
+
+  describe('findOne', () => {
     it('should find one domain by id', async () => {
-      const result = await service.findOne(testDomain.id);
+      const input: FindDomainInput = { id: testDomain.id };
+      const result = await repository.findOne(input);
       expect(result).toEqual(testDomain);
+      expect(mockDbService.domain.findUnique).toHaveBeenCalledWith({
+        where: { id: input.id },
+      });
     });
   });
 
-  describe('remove method', () => {
+  describe('remove', () => {
     it('should remove a domain by id', async () => {
-      const result = await service.remove(testDomain.id);
+      const input: RemoveDomainInput = { id: testDomain.id };
+      const result = await repository.remove(input);
       expect(result).toEqual(testDomain);
+      expect(mockDbService.domain.delete).toHaveBeenCalledWith({
+        where: { id: input.id },
+      });
     });
   });
 
-  describe('updateExpirationDate method', () => {
-    beforeEach(() => {
-      mockDbService.domain.update = jest.fn().mockResolvedValue(testExpirationDateDomain);
-    });
-
-    it('should update the expiration date of a domain', async () => {
-      const result = await service.updateDomainExpirationDate(testDomain.id);
-      expect(result).toEqual(testExpirationDateDomain);
-      expect(mockDbService.domain.findUnique).toHaveBeenCalledWith({ where: { id: testDomain.id } });
-      expect(mockExpirationService.getExpirationDate).toHaveBeenCalledWith(testDomain.name);
+  describe('updateExpirationDate', () => {
+    it('should update a domain expiration date', async () => {
+      const input: UpdateExpirationDateInput = { id: testDomain.id, expirationDate: testExpirationDate };
+      const result = await repository.updateExpirationDate(input);
+      expect(result).toEqual(testUpdatedDomain);
       expect(mockDbService.domain.update).toHaveBeenCalledWith({
-        where: { id: testDomain.id },
-        data: { expirationDate: testExpirationDateDomain.expirationDate },
+        where: { id: input.id },
+        data: { expirationDate: input.expirationDate },
       });
     });
   });
 });
-
-const testDomain = {
-  id: '1',
-  name: 'example.com',
-  userId: 'test-user-id',
-};
-
-const mockDbService = {
-  domain: {
-    create: jest.fn().mockResolvedValue(testDomain),
-    findMany: jest.fn().mockResolvedValue([testDomain]),
-    findFirst: jest.fn().mockResolvedValue(testDomain),
-    findUnique: jest.fn().mockResolvedValue(testDomain),
-    delete: jest.fn().mockResolvedValue(testDomain),
-    update: jest.fn().mockResolvedValue(testDomain),
-  },
-};
-
-const mockExpirationService = {
-  getExpirationDate: jest.fn().mockResolvedValue(new Date()),
-};
-
-const testExpirationDateDomain = {
-  ...testDomain,
-  expirationDate: new Date(),
-};

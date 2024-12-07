@@ -17,16 +17,16 @@ export class DomainsController {
 
   @Post()
   @ApiCreatedResponse({ type: GetDomainDto })
-  create(@Body() { name }: CreateDomainDto, @UserId() userId: string) {
+  async create(@Body() { name }: CreateDomainDto, @UserId() userId: string) {
     this.logger.log(`Creating domain ${name}`);
-    return this.domainsService.create(name, userId);
+    return await this.domainsService.create(name, userId);
   }
 
   @Get()
   @ApiOkResponse({ type: [GetDomainDto] })
-  findAll(@UserId() userId: string) {
+  async findAll(@UserId() userId: string) {
     this.logger.log(`Getting all domains for user ${userId}`);
-    return this.domainsService.findAllWithUser(userId);
+    return await this.domainsService.findAllWithUser(userId);
   }
 
   @Get(':id')
@@ -44,10 +44,6 @@ export class DomainsController {
   @Post(':id/refresh')
   async refreshDomainExpiration(@UserId() userId: string, @Body() { id }: { id: string }) {
     this.logger.log(`Refreshing domain ${id} for user ${userId}`);
-    const domain = await this.domainsService.findOneWithUser(id, userId);
-    if (!domain || domain.userId !== userId) {
-      throw new NotFoundException(`Domain ${id} not found`);
-    }
 
     return this.domainsService.updateDomainExpirationDateWithUser(id, userId);
   }

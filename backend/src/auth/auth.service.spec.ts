@@ -3,12 +3,17 @@ import { UsersService } from '@src/users/users.service';
 import { EncryptionService } from '@src/encryption/encryption.service';
 import { User } from '@prisma/client';
 import { AuthService } from './auth.service';
+import { baseConfig } from '@src/config/base.config';
 
 const mockUser = {
   id: '1',
   email: 'test@example.com',
   passwordDigest: 'encryptedPassword',
 } as User;
+
+const baseConfigMock = {
+  sessionTime: 3600,
+};
 
 const mockUsersService = {
   findUserByEmail: jest.fn().mockResolvedValue(mockUser),
@@ -33,6 +38,10 @@ describe(AuthService.name, () => {
         {
           provide: EncryptionService,
           useValue: mockEncryptionService,
+        },
+        {
+          provide: baseConfig.KEY,
+          useValue: baseConfigMock,
         },
       ],
     }).compile();

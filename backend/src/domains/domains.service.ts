@@ -1,76 +1,53 @@
 import { HttpException, Injectable, NotFoundException } from '@nestjs/common';
-import { DbService } from '@src/db/db.service';
+import { DomainsRepository } from './domains.repository';
 import { DomainsExpirationService } from './domains-expiration/domains-expiration.service';
+import {
+  CreateDomainInput,
+  FindDomainInput,
+  FindDomainsByUserInput,
+  RemoveDomainInput,
+  UpdateExpirationDateInput,
+} from './domains.interfaces';
 
 @Injectable()
 export class DomainsService {
-  constructor(private readonly db: DbService, private readonly expirationService: DomainsExpirationService) {}
+  constructor(
+    private readonly repository: DomainsRepository,
+    private readonly expirationService: DomainsExpirationService,
+  ) {}
 
-  public async create(domain: string, userId: string) {
-    return this.db.domain.create({
-      data: {
-        name: domain,
-        user: {
-          connect: {
-            id: userId,
-          },
-        },
-      },
-    });
+  public async create(name: string, userId: string) {
+    const input: CreateDomainInput = { name, userId };
+    return this.repository.create(input);
   }
 
   public async findAllWithUser(userId: string) {
-    return this.db.domain.findMany({
-      where: {
-        user: {
-          id: userId,
-        },
-      },
-    });
+    const input: FindDomainsByUserInput = { userId };
+    return this.repository.findAllWithUser(input);
   }
 
   public async findOneWithUser(id: string, userId: string) {
-    const domain = await this.db.domain.findFirst({
-      where: {
-        id,
-        user: {
-          id: userId,
-        },
-      },
-    });
-
+    const input: FindDomainInput = { id, userId };
+    const domain = await this.repository.findOneWithUser(input);
     if (!domain) {
       throw new NotFoundException(`Domain with id ${id} not found`);
     }
-
     return domain;
   }
 
   public async removeWithUser(id: string, userId: string) {
-    const domain = await this.db.domain.findUnique({
-      where: {
-        id,
-      },
-    });
-
+    const input: FindDomainInput = { id };
+    const domain = await this.repository.findOne(input);
     if (!domain || domain.userId !== userId) {
       throw new NotFoundException(`Domain with id ${id} not found`);
     }
-
-    return this.db.domain.delete({
-      where: {
-        id,
-      },
-    });
+    const removeInput: RemoveDomainInput = { id };
+    return this.repository.removeWithUser(removeInput);
   }
 
   public async updateDomainExpirationDateWithUser(id: string, userId: string) {
-    const domain = await this.db.domain.findUnique({
-      where: {
-        id,
-      },
-    });
-
+    const input: FindDomainInput = { id };
+    const domain = await this.repository.findOne(input);
     if (!domain || domain.userId !== userId) {
       throw new NotFoundException(`Domain with id ${id} not found`);
     }
@@ -80,59 +57,36 @@ export class DomainsService {
       throw new HttpException('Could not get expiration date', 424);
     }
 
-    return this.db.domain.update({
-      where: {
-        id,
-      },
-      data: {
-        expirationDate,
-      },
-    });
+    const updateInput: UpdateExpirationDateInput = { id, expirationDate };
+    return this.repository.updateExpirationDate(updateInput);
   }
 
   public async findAll() {
-    return this.db.domain.findMany();
+    return this.repository.findAll();
   }
 
   public async findOne(id: string) {
-    const domain = await this.db.domain.findUnique({
-      where: {
-        id,
-      },
-    });
-
+    const input: FindDomainInput = { id };
+    const domain = await this.repository.findOne(input);
     if (!domain) {
       throw new NotFoundException(`Domain with id ${id} not found`);
     }
-
     return domain;
   }
 
   public async remove(id: string) {
-    const domain = await this.db.domain.findUnique({
-      where: {
-        id,
-      },
-    });
-
+    const input: FindDomainInput = { id };
+    const domain = await this.repository.findOne(input);
     if (!domain) {
       throw new NotFoundException(`Domain with id ${id} not found`);
     }
-
-    return this.db.domain.delete({
-      where: {
-        id,
-      },
-    });
+    const removeInput: RemoveDomainInput = { id };
+    return this.repository.remove(removeInput);
   }
 
   public async updateDomainExpirationDate(id: string) {
-    const domain = await this.db.domain.findUnique({
-      where: {
-        id,
-      },
-    });
-
+    const input: FindDomainInput = { id };
+    const domain = await this.repository.findOne(input);
     if (!domain) {
       throw new NotFoundException(`Domain with id ${id} not found`);
     }
@@ -142,13 +96,7 @@ export class DomainsService {
       throw new HttpException('Could not get expiration date', 424);
     }
 
-    return this.db.domain.update({
-      where: {
-        id,
-      },
-      data: {
-        expirationDate,
-      },
-    });
+    const updateInput: UpdateExpirationDateInput = { id, expirationDate };
+    return this.repository.updateExpirationDate(updateInput);
   }
 }

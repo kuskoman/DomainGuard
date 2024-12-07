@@ -40,7 +40,12 @@ describe(DomainsController.name, () => {
 
   describe('findOne method', () => {
     it('should find one domain by id for a user', async () => {
-      const result = await controller.findOne({ userId: testDomain.userId } as any, { id: testDomain.id });
+      mockDomainsService.findOneWithUser.mockResolvedValueOnce(testDomain);
+
+      const result = await controller.findOne(testDomain.userId, { id: testDomain.id });
+
+      expect(mockDomainsService.findOneWithUser).toHaveBeenCalledWith(testDomain.id, testDomain.userId);
+
       expect(result).toEqual(testDomain);
     });
 
@@ -61,10 +66,13 @@ describe(DomainsController.name, () => {
     });
 
     it('should throw NotFoundException when domain is not found', async () => {
-      mockDomainsService.findOneWithUser.mockResolvedValueOnce(null);
-      await expect(
-        controller.refreshDomainExpiration({ userId: testDomain.userId } as any, { id: 'wrong-id' }),
-      ).rejects.toThrow(NotFoundException);
+      mockDomainsService.updateDomainExpirationDateWithUser.mockImplementationOnce(async () => {
+        throw new NotFoundException();
+      });
+
+      await expect(controller.refreshDomainExpiration(testDomain.userId, { id: 'wrong-id' })).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 });

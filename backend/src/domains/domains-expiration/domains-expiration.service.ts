@@ -1,15 +1,27 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import whois from 'whois-json';
 
 @Injectable()
 export class DomainsExpirationService {
-  public async getExpirationDate(domain: string) {
+  private readonly logger = new Logger(DomainsExpirationService.name);
+
+  public async getExpirationDate(domain: string): Promise<Date | null> {
+    this.logger.log(`Getting expiration date for domain ${domain}`);
     const whoisResult = await whois(domain);
     const whoisData = this.extractWhoisData(whoisResult);
     if (!whoisData) {
+      this.logger.warn(`Could not get whois data for domain ${domain}`);
       return null;
     }
-    return whoisData.registrarRegistrationExpirationDate;
+
+    const whoisExpirationDate = whoisData.registrarRegistrationExpirationDate;
+    if (!whoisExpirationDate) {
+      this.logger.warn(`Could not get expiration date for domain ${domain}`);
+      return null;
+    }
+
+    const parsedExpirationDate = new Date(whoisExpirationDate);
+    return parsedExpirationDate;
   }
 
   /**
@@ -18,6 +30,7 @@ export class DomainsExpirationService {
    */
   private extractWhoisData(whoisResult: Awaited<ReturnType<typeof whois>>) {
     if (Array.isArray(whoisResult)) {
+      this.logger.log('Whois result is an array, extracting first element');
       return whoisResult[0].data;
     }
 
