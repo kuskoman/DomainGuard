@@ -3,7 +3,7 @@
     <v-row>
       <v-col cols="12" md="8" offset-md="2">
         <h1 class="display-3 mb-6 primary--text">DomainGuard</h1>
-        <p class="subtitle-1 mb-6 text-secondary">
+        <p class="subtitle-1 mb-6">
           DomainGuard is a powerful tool for monitoring the validity of domains and SSL certificates, ensuring online
           safety for businesses and individuals.
         </p>
@@ -40,10 +40,6 @@
     </v-row>
   </v-container>
 </template>
-
-<script lang="ts" setup>
-// The homepage content
-</script>
 
 <style lang="scss" scoped>
 h1 {

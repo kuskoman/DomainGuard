@@ -1,58 +1,58 @@
 /**
  * plugins/vuetify.ts
  *
- * Framework documentation: https://vuetifyjs.com`
+ * framework documentation: https://vuetifyjs.com
  */
 
-// Styles
+// styles
 import "@mdi/font/css/materialdesignicons.css";
 import "vuetify/styles";
 import "@/styles/settings.scss";
 import { createVuetify } from "vuetify";
 
-const myCustomGreenTheme = {
+const myCustomMUITheme = {
   dark: false,
   colors: {
-    background: "#F1F8F6", // Soft greenish white
-    surface: "#FFFFFF", // Clean white for cards and containers
-    "surface-bright": "#FFFFFF", // Bright white for elevated surfaces
-    "surface-light": "#EAF3ED", // Slightly muted surface color
-    "surface-variant": "#C8D6D0", // Muted gray-green for variants
-    "on-surface-variant": "#4F5D53", // Text on variant surfaces
-    primary: "#43A047", // Vibrant green
-    "primary-darken-1": "#2E7D32", // Darker green for primary actions
-    secondary: "#8BC34A", // Lime green for secondary actions
-    "secondary-darken-1": "#689F38", // Darker lime for emphasis
-    error: "#D32F2F", // Red for errors
-    info: "#1976D2", // Blue for information
-    success: "#388E3C", // Dark green for success states
-    warning: "#FFA000", // Amber for warnings
+    background: "#FFFFFF", // clean white background
+    surface: "#F5F5F5", // light gray for cards and containers
+    "surface-bright": "#FFFFFF", // bright white for elevated surfaces
+    "surface-light": "#E0E0E0", // slightly darker gray for subtle surfaces
+    "surface-variant": "#BDBDBD", // neutral gray for variants
+    "on-surface-variant": "#424242", // text on variant surfaces
+    primary: "#43A047", // vibrant green for navigation and primary actions
+    "primary-darken-1": "#2E7D32", // darker green for emphasis
+    secondary: "#FFB300", // amber for secondary actions and highlights
+    "secondary-darken-1": "#FFA000", // darker amber
+    error: "#E53935", // material design red for errors
+    info: "#1E88E5", // material design blue for information
+    success: "#43A047", // reusing green for success states
+    warning: "#FB8C00", // orange for warnings
   },
   variables: {
-    "border-color": "#C8D6D0", // Muted green for borders
+    "border-color": "#E0E0E0", // neutral gray for borders
     "border-opacity": 0.15,
-    "high-emphasis-opacity": 0.9,
-    "medium-emphasis-opacity": 0.65,
+    "high-emphasis-opacity": 0.87,
+    "medium-emphasis-opacity": 0.6,
     "disabled-opacity": 0.38,
-    "idle-opacity": 0.06,
+    "idle-opacity": 0.04,
     "hover-opacity": 0.08,
     "focus-opacity": 0.12,
     "selected-opacity": 0.1,
     "activated-opacity": 0.14,
     "pressed-opacity": 0.14,
     "dragged-opacity": 0.1,
-    "theme-kbd": "#2E7D32", // Green for keyboard hint backgrounds
-    "theme-on-kbd": "#FFFFFF", // White text on keyboard hints
-    "theme-code": "#F1F8F6", // Light greenish white for code blocks
-    "theme-on-code": "#2E7D32", // Dark green text on code blocks
+    "theme-kbd": "#424242", // dark gray for keyboard hint backgrounds
+    "theme-on-kbd": "#FFFFFF", // white text on keyboard hints
+    "theme-code": "#F5F5F5", // light gray for code blocks
+    "theme-on-code": "#424242", // dark gray text on code blocks
   },
 };
 
 export default createVuetify({
   theme: {
-    defaultTheme: "myCustomGreenTheme",
+    defaultTheme: "myCustomMUITheme",
     themes: {
-      myCustomGreenTheme,
+      myCustomMUITheme,
     },
   },
 });
