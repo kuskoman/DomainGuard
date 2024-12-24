@@ -27,6 +27,7 @@ const myCustomMUITheme = {
     info: "#1E88E5", // material design blue for information
     success: "#43A047", // reusing green for success states
     warning: "#FB8C00", // orange for warnings
+    caption: "#757575", // medium gray for captions and disabled text
   },
   variables: {
     "border-color": "#E0E0E0", // neutral gray for borders
