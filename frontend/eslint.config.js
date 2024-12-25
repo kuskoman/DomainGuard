@@ -35,5 +35,13 @@ export default [
       "vue/multi-word-component-names": "off",
       "vue/max-attributes-per-line": "off",
     },
+    overrides: [
+      {
+        files: ["**/*.spec.{ts,tsx}"],
+        rules: {
+          "@typescript-eslint/no-explicit-any": "off",
+        },
+      },
+    ],
   },
 ];

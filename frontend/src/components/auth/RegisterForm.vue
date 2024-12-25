@@ -21,7 +21,7 @@
 
 <script setup lang="ts">
 import { apiClient } from "@/api/client";
-import type { UserRegisterResponse } from "@/api/interfaces/users.responses";
+import type { UserDetailsResponse } from "@/api/interfaces/users.responses";
 import { AlertType, useAlertStore } from "@/stores/alerts";
 import { rules } from "@/utils/formUtils";
 import { ref, computed } from "vue";
@@ -40,7 +40,7 @@ const confirmPasswordRule = computed(() => {
 
 const submit = async () => {
   try {
-    const response = await apiClient.post<UserRegisterResponse>("/users/register", {
+    const response = await apiClient.post<UserDetailsResponse>("/users/register", {
       email: email.value,
       password: password.value,
     });
