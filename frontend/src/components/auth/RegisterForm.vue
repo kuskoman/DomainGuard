@@ -8,27 +8,43 @@
       :rules="[rules.required, rules.minLength]"
       required
     />
-    <v-btn :disabled="!valid" @click="submit">Register</v-btn>
+    <v-text-field
+      v-model="passwordConfirmation"
+      label="Confirm Password"
+      type="password"
+      :rules="[rules.required, confirmPasswordRule]"
+      required
+    />
+    <v-btn :disabled="!valid" color="primary" @click="submit">Register</v-btn>
   </v-form>
 </template>
 
 <script setup lang="ts">
 import { apiClient } from "@/api/client";
+import type { UserRegisterResponse } from "@/api/interfaces/users.interfaces";
 import { AlertType, useAlertStore } from "@/stores/alerts";
 import { rules } from "@/utils/formUtils";
-import { ref } from "vue";
+import { ref, computed } from "vue";
 
 const form = ref(null);
 const valid = ref(false);
 const email = ref("");
 const password = ref("");
+const passwordConfirmation = ref("");
 
 const alertsStore = useAlertStore();
 
+const confirmPasswordRule = computed(() => {
+  return (value: string) => value === password.value || "Passwords do not match";
+});
+
 const submit = async () => {
   try {
-    const response = await apiClient.post("/register", { email: email.value, password: password.value });
-    console.log(response.data);
+    const response = await apiClient.post<UserRegisterResponse>("/users/register", {
+      email: email.value,
+      password: password.value,
+    });
+    console.log(response.data); // todo: actually login the user
     alertsStore.addAlert(AlertType.Success, "User registered successfully!");
   } catch (error: unknown) {
     alertsStore.addAlert(AlertType.Error, `Failed to register user: ${(error as Error).message}`);

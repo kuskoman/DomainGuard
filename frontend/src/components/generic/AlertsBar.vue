@@ -1,14 +1,18 @@
 <template>
-  <v-container>
-    <v-alert v-for="alert in alerts" :key="alert.id" :type="alert.type" prominent elevation="2" class="mb-3">
+  <div class="alerts-bar">
+    <v-alert
+      v-for="alert in alerts"
+      :key="alert.id"
+      :type="alert.type"
+      prominent
+      elevation="2"
+      class="full-width"
+      closable
+      @click:close="() => removeAlert(alert.id)"
+    >
       {{ alert.message }}
-      <template #append>
-        <v-btn icon @click="removeAlert(alert.id)">
-          <v-icon>mdi-close</v-icon>
-        </v-btn>
-      </template>
     </v-alert>
-  </v-container>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -21,7 +25,25 @@ const removeAlert = (id: number) => alertStore.removeAlert(id);
 </script>
 
 <style scoped lang="scss">
-.v-alert {
-  max-width: 500px;
+.alerts-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+}
+
+.full-width {
+  width: 100%;
+  margin: 0;
+  border-radius: 0;
+}
+
+.v-alert v-btn {
+  color: inherit;
+}
+
+.v-btn {
+  margin-left: auto;
 }
 </style>
