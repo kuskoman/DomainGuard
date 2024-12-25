@@ -7,7 +7,7 @@
           DomainGuard is a powerful tool for monitoring the validity of domains and SSL certificates, ensuring online
           safety for businesses and individuals.
         </p>
-        <v-btn color="primary" large elevation="2"> Get Started </v-btn>
+        <v-btn color="primary" large elevation="2" to="/user/register"> Get Started </v-btn>
       </v-col>
     </v-row>
     <v-row class="mt-10">

@@ -9,9 +9,6 @@
 <style scoped lang="scss">
 .v-footer {
   background-color: rgba(var(--v-theme-primary));
-}
-
-.v-footer {
   font-size: 0.875rem;
 }
 </style>
