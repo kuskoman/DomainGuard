@@ -27,7 +27,7 @@ const removeAlert = (id: number) => alertStore.removeAlert(id);
 <style scoped lang="scss">
 .alerts-bar {
   position: fixed;
-  top: 0;
+  top: 64px;
   left: 0;
   right: 0;
   z-index: 10;
