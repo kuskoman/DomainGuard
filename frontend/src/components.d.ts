@@ -11,6 +11,7 @@ declare module 'vue' {
     'AlertsBar.spec': typeof import('./components/generic/AlertsBar.spec')['default']
     AppFooter: typeof import('./components/generic/AppFooter.vue')['default']
     HelloWorld: typeof import('./components/generic/HelloWorld.vue')['default']
+    LoginForm: typeof import('./components/auth/LoginForm.vue')['default']
     RegisterForm: typeof import('./components/auth/RegisterForm.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']

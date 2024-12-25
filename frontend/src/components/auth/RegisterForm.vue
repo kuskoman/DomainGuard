@@ -21,7 +21,7 @@
 
 <script setup lang="ts">
 import { apiClient } from "@/api/client";
-import type { UserRegisterResponse } from "@/api/interfaces/users.interfaces";
+import type { UserRegisterResponse } from "@/api/interfaces/users.responses";
 import { AlertType, useAlertStore } from "@/stores/alerts";
 import { rules } from "@/utils/formUtils";
 import { ref, computed } from "vue";
