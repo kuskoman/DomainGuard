@@ -1,11 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import { JwtPayload } from './encryption.interfaces';
+import { randomBytes } from 'crypto';
 
 @Injectable()
 export class EncryptionService {
-  constructor(private readonly jwtService: JwtService) {}
+  constructor() {}
 
   public async hashPassword(password: string): Promise<string> {
     return bcrypt.hash(password, 10);
@@ -15,11 +14,15 @@ export class EncryptionService {
     return bcrypt.compare(password, hashedPassword);
   }
 
-  public sign<T extends object = JwtPayload>(payload: T, expiresIn = 3600): string {
-    return this.jwtService.sign(payload, { expiresIn });
-  }
+  public generateRandomString(length: number): string {
+    if (length < 1) {
+      throw new Error('Length must be greater than 0');
+    }
 
-  public verify<T extends object = JwtPayload>(token: string): T {
-    return this.jwtService.verify(token);
+    if (!Number.isInteger(length)) {
+      throw new Error('Length must be an integer');
+    }
+
+    return randomBytes(length).toString('hex').slice(0, length);
   }
 }

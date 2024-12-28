@@ -1,8 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { EncryptionService } from './encryption.service';
-import { JwtModule } from '@nestjs/jwt';
-
-const mockSecret = 'secret';
 
 describe(EncryptionService.name, () => {
   let service: EncryptionService;
@@ -10,7 +7,6 @@ describe(EncryptionService.name, () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [EncryptionService],
-      imports: [JwtModule.register({ secret: mockSecret, signOptions: { expiresIn: '15m' } })],
     }).compile();
 
     service = module.get<EncryptionService>(EncryptionService);
@@ -44,21 +40,31 @@ describe(EncryptionService.name, () => {
     });
   });
 
-  describe('sign', () => {
-    it('should return a string', () => {
-      const payload = { sub: 1, email: 'test@example.com' };
-      const result = service.sign(payload);
+  describe('generateRandomString', () => {
+    it('should return a string of the specified length', () => {
+      const length = 16;
+      const result = service.generateRandomString(length);
       expect(typeof result).toBe('string');
+      expect(result.length).toBe(length);
     });
-  });
 
-  describe('verify', () => {
-    it('should return the original payload', () => {
-      const payload = { sub: 1, email: 'test@example.com' };
-      const token = service.sign(payload);
-      const result = service.verify(token);
-      expect(result.sub).toBe(payload.sub);
-      expect(result.email).toBe(payload.email);
+    it('should generate unique strings', () => {
+      const length = 16;
+      const result1 = service.generateRandomString(length);
+      const result2 = service.generateRandomString(length);
+      expect(result1).not.toEqual(result2);
+    });
+
+    it('should throw an error if length is less than 1', () => {
+      expect(() => service.generateRandomString(0)).toThrow('Length must be greater than 0');
+    });
+
+    it('should throw an error if length is not an integer', () => {
+      expect(() => service.generateRandomString(5.5)).toThrow('Length must be an integer');
+    });
+
+    it('should throw an error if length is negative', () => {
+      expect(() => service.generateRandomString(-5)).toThrow('Length must be greater than 0');
     });
   });
 });
