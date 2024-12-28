@@ -1,6 +1,9 @@
 export interface UserDetailsResponse {
-  email: string;
-  id: string;
-  firstName: string | null;
-  lastName: string | null;
+  user: {
+    email: string;
+    id: string;
+    firstName: string | null;
+    lastName: string | null;
+  };
+  accessToken: string;
 }

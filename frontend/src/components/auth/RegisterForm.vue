@@ -21,8 +21,11 @@
 
 <script setup lang="ts">
 import { apiClient } from "@/api/client";
+import type { AuthLoginResponse } from "@/api/interfaces/auth.responses";
 import type { UserDetailsResponse } from "@/api/interfaces/users.responses";
+import router from "@/router";
 import { AlertType, useAlertStore } from "@/stores/alerts";
+import { useUserStore } from "@/stores/user";
 import { rules } from "@/utils/formUtils";
 import { ref, computed } from "vue";
 
@@ -33,6 +36,7 @@ const password = ref("");
 const passwordConfirmation = ref("");
 
 const alertsStore = useAlertStore();
+const userStore = useUserStore();
 
 const confirmPasswordRule = computed(() => {
   return (value: string) => value === password.value || "Passwords do not match";
@@ -40,12 +44,15 @@ const confirmPasswordRule = computed(() => {
 
 const submit = async () => {
   try {
-    const response = await apiClient.post<UserDetailsResponse>("/users/register", {
+    const { data } = await apiClient.post<UserDetailsResponse>("/users/register", {
       email: email.value,
       password: password.value,
     });
-    console.log(response.data); // todo: actually login the user
+    const { accessToken, user } = data;
     alertsStore.addAlert(AlertType.Success, "User registered successfully!");
+    userStore.setAccessToken(accessToken);
+    await userStore.fetchUserDetails();
+    router.push("/");
   } catch (error: unknown) {
     alertsStore.addAlert(AlertType.Error, `Failed to register user: ${(error as Error).message}`);
   }
