@@ -25,6 +25,6 @@ const userStore = useUserStore();
 const isLoggedIn = computed(() => !!userStore.accessToken);
 
 const logout = () => {
-  userStore.clearAccessToken();
+  userStore.logout();
 };
 </script>

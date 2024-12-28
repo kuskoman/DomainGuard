@@ -10,11 +10,14 @@ declare module 'vue' {
     AlertsBar: typeof import('./components/generic/AlertsBar.vue')['default']
     'AlertsBar.spec': typeof import('./components/generic/AlertsBar.spec')['default']
     AppFooter: typeof import('./components/generic/AppFooter.vue')['default']
+    FormattedDate: typeof import('./components/generic/FormattedDate.vue')['default']
     HelloWorld: typeof import('./components/generic/HelloWorld.vue')['default']
     LoginForm: typeof import('./components/auth/LoginForm.vue')['default']
+    ProfileInfo: typeof import('./components/profile/ProfileInfo.vue')['default']
     RegisterForm: typeof import('./components/auth/RegisterForm.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    SessionList: typeof import('./components/profile/SessionList.vue')['default']
     TopNavbar: typeof import('./components/generic/TopNavbar.vue')['default']
   }
 }

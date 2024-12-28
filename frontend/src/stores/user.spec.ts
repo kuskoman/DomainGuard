@@ -26,7 +26,7 @@ describe("User Store", () => {
     expect(localStorage.getItem("accessToken")).toBe("test-token");
     expect(apiClient.defaults.headers.common["Authorization"]).toBe("Bearer test-token");
 
-    store.clearAccessToken();
+    store.logout();
     expect(store.accessToken).toBe("");
     expect(localStorage.getItem("accessToken")).toBeNull();
     expect(apiClient.defaults.headers.common["Authorization"]).toBeUndefined();
@@ -50,7 +50,6 @@ describe("User Store", () => {
     await store.fetchUserDetails();
 
     expect(store.userDetails).toEqual(mockResponse.data);
-    expect(store.email).toBe("test@example.com");
     expect(localStorage.getItem("userEmail")).toBe("test@example.com");
     expect(alertStore.alerts).toHaveLength(0);
   });
@@ -68,7 +67,6 @@ describe("User Store", () => {
     await store.fetchUserDetails();
 
     expect(store.accessToken).toBe("");
-    expect(store.email).toBe("");
     expect(store.userDetails).toBeNull();
     expect(localStorage.getItem("accessToken")).toBeNull();
     expect(localStorage.getItem("userEmail")).toBeNull();

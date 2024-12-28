@@ -6,4 +6,7 @@ export const apiClient = axios.create({
   timeout: 10000,
 });
 
-apiClient.interceptors.response.use((response) => response);
+const accessToken = localStorage.getItem("accessToken");
+if (accessToken) {
+  apiClient.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
+}

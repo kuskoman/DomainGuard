@@ -1,9 +1,11 @@
 export interface UserDetailsResponse {
-  user: {
-    email: string;
-    id: string;
-    firstName: string | null;
-    lastName: string | null;
-  };
+  email: string;
+  id: string;
+  firstName: string | null;
+  lastName: string | null;
+}
+
+export interface UserRegisterResponse {
+  user: UserDetailsResponse;
   accessToken: string;
 }

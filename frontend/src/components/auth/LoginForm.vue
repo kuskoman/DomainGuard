@@ -22,7 +22,7 @@ import { AlertType, useAlertStore } from "@/stores/alerts";
 import { useUserStore } from "@/stores/user";
 import { rules } from "@/utils/formUtils";
 import { ref, watch } from "vue";
-import axios, { AxiosError } from "axios";
+import { AxiosError } from "axios";
 
 const form = ref(null);
 const valid = ref(false);
@@ -48,7 +48,9 @@ const submit = async () => {
     userStore.setAccessToken(accessToken);
     await userStore.fetchUserDetails();
     alertsStore.addAlert(AlertType.Success, "User logged in successfully!");
-    router.push("/");
+    router.push({
+      name: "/user/profile",
+    });
   } catch (error: unknown) {
     if (error instanceof AxiosError && error.response?.status === 401) {
       invalidCredentials.value = true;
