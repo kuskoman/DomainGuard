@@ -18,6 +18,7 @@ describe(SessionsService.name, () => {
     get: jest.fn(),
     del: jest.fn(),
     exists: jest.fn(),
+    listKeys: jest.fn(),
   };
 
   const baseConfigMock = {
@@ -156,6 +157,83 @@ describe(SessionsService.name, () => {
         const result = (service as any).getSessionKey('testUserId', 'session123');
         expect(result).toBe('session:testUserId:session123');
       });
+    });
+  });
+
+  describe('getSessionsForUser', () => {
+    it('should return all valid sessions for a user', async () => {
+      const userId = 'testUserId';
+      const sessionKeys = ['session:testUserId:session1', 'session:testUserId:session2'];
+      const sessionData = [
+        { sessionHash: 'hash1', createdAt: new Date().toISOString() },
+        { sessionHash: 'hash2', createdAt: new Date().toISOString() },
+      ];
+
+      redisServiceMock.listKeys.mockResolvedValue(sessionKeys);
+      redisServiceMock.get
+        .mockResolvedValueOnce(JSON.stringify(sessionData[0]))
+        .mockResolvedValueOnce(JSON.stringify(sessionData[1]));
+
+      const result = await service.getSessionsForUser(userId);
+
+      const sessionDataWithDate = sessionData.map((data) => ({ ...data, createdAt: new Date(data.createdAt) }));
+      expect(result).toEqual(sessionDataWithDate);
+      expect(redisServiceMock.listKeys).toHaveBeenCalledWith('session:testUserId:*');
+      expect(redisServiceMock.get).toHaveBeenCalledTimes(2);
+    });
+
+    it('should filter out null sessions', async () => {
+      const userId = 'testUserId';
+      const sessionKeys = ['session:testUserId:session1', 'session:testUserId:session2'];
+
+      redisServiceMock.listKeys.mockResolvedValue(sessionKeys);
+      redisServiceMock.get
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce(JSON.stringify({ sessionHash: 'hash2', createdAt: new Date().toISOString() }));
+
+      const result = await service.getSessionsForUser(userId);
+
+      expect(result).toEqual([{ sessionHash: 'hash2', createdAt: expect.any(Date) }]);
+      expect(redisServiceMock.get).toHaveBeenCalledTimes(2);
+    });
+
+    it('should return an empty array if no sessions are found', async () => {
+      const userId = 'testUserId';
+      redisServiceMock.listKeys.mockResolvedValue([]);
+
+      const result = await service.getSessionsForUser(userId);
+
+      expect(result).toEqual([]);
+      expect(redisServiceMock.listKeys).toHaveBeenCalledWith('session:testUserId:*');
+      expect(redisServiceMock.get).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('deleteAllSessionsForUser', () => {
+    it('should delete all sessions for a user', async () => {
+      const userId = 'testUserId';
+      const sessionKeys = ['session:testUserId:session1', 'session:testUserId:session2'];
+
+      redisServiceMock.listKeys.mockResolvedValue(sessionKeys);
+      redisServiceMock.del.mockResolvedValue(1);
+
+      await service.deleteAllSessionsForUser(userId);
+
+      expect(redisServiceMock.listKeys).toHaveBeenCalledWith('session:testUserId:*');
+      expect(redisServiceMock.del).toHaveBeenCalledTimes(2);
+      expect(redisServiceMock.del).toHaveBeenCalledWith('session:testUserId:session1');
+      expect(redisServiceMock.del).toHaveBeenCalledWith('session:testUserId:session2');
+    });
+
+    it('should handle cases where no sessions exist', async () => {
+      const userId = 'testUserId';
+
+      redisServiceMock.listKeys.mockResolvedValue([]);
+
+      await service.deleteAllSessionsForUser(userId);
+
+      expect(redisServiceMock.listKeys).toHaveBeenCalledWith('session:testUserId:*');
+      expect(redisServiceMock.del).not.toHaveBeenCalled();
     });
   });
 });

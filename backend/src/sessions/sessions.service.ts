@@ -100,6 +100,22 @@ export class SessionsService {
     this.logger.log(`Session deleted for user ${userId}`);
   }
 
+  public async getSessionsForUser(userId: string) {
+    const sessionKeys = await this.getAllSessionKeys(userId);
+    const sessions = await Promise.all(sessionKeys.map((key) => this.getSession(key)));
+    return sessions.filter((session) => session !== null);
+  }
+
+  public async deleteAllSessionsForUser(userId: string) {
+    const sessionKeys = await this.getAllSessionKeys(userId);
+    await Promise.all(sessionKeys.map((key) => this.redisService.del(key)));
+    this.logger.log(`All sessions deleted for user ${userId}`);
+  }
+
+  private async getAllSessionKeys(userId: string) {
+    return await this.redisService.listKeys(`session:${userId}:*`);
+  }
+
   private async generateUniqueSessionId(userId: string): Promise<string> {
     const id = this.encryptionService.generateRandomString(10);
     const key = this.getSessionKey(userId, id);
