@@ -29,7 +29,7 @@ describe(SessionsController.name, () => {
       const mockSessions = [{ sessionId: 'session1' }, { sessionId: 'session2' }];
       mockSessionsService.getSessionsForUser.mockResolvedValue(mockSessions);
 
-      const result = await controller.getMySession(userId);
+      const result = await controller.getMySessions(userId);
 
       expect(result).toEqual(mockSessions);
       expect(mockSessionsService.getSessionsForUser).toHaveBeenCalledWith(userId);

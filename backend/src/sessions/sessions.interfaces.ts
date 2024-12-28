@@ -1,4 +1,4 @@
-export interface SessionData {
+export interface SessionSavedData {
   createdAt: Date;
   sessionHash: string;
 }

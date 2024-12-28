@@ -2,7 +2,8 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { BaseConfig, baseConfig } from '@src/config/base.config';
 import { EncryptionService } from '@src/encryption/encryption.service';
 import { RedisService } from '@src/lib/redis/redis.service';
-import { RetrieveSessionPayload, SessionData } from './sessions.interfaces';
+import { RetrieveSessionPayload, SessionSavedData } from './sessions.interfaces';
+import { SessionDataDto } from './dto/sessionData.dto';
 
 @Injectable()
 export class SessionsService {
@@ -100,10 +101,21 @@ export class SessionsService {
     this.logger.log(`Session deleted for user ${userId}`);
   }
 
-  public async getSessionsForUser(userId: string) {
+  public async getSessionsForUser(userId: string): Promise<SessionDataDto[]> {
     const sessionKeys = await this.getAllSessionKeys(userId);
-    const sessions = await Promise.all(sessionKeys.map((key) => this.getSession(key)));
-    return sessions.filter((session) => session !== null);
+    const allSessionPromises = sessionKeys
+      .map((key) => ({ sessionId: key.split(':')[2], key }))
+      .map(async (session) => {
+        const sessionData = await this.getSession(session.key);
+        if (!sessionData) {
+          return null;
+        }
+        return { sessionId: session.sessionId, createdAt: sessionData.createdAt };
+      });
+    const allSessions = await Promise.all(allSessionPromises);
+    return allSessions
+      .filter((session) => session !== null)
+      .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
   }
 
   public async deleteAllSessionsForUser(userId: string) {
@@ -137,7 +149,7 @@ export class SessionsService {
     return this.redisService.set(sessionId, stringifiedSessionData, this.sessionTime);
   }
 
-  private async getSession(sessionKey: string): Promise<SessionData | null> {
+  private async getSession(sessionKey: string): Promise<SessionSavedData | null> {
     const sessionData = await this.redisService.get(sessionKey);
     if (!sessionData) {
       return null;

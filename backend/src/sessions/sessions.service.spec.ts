@@ -162,11 +162,14 @@ describe(SessionsService.name, () => {
 
   describe('getSessionsForUser', () => {
     it('should return all valid sessions for a user', async () => {
+      const date1Mock = new Date('2021-01-01T00:00:00Z');
+      const date2Mock = new Date('2021-01-02T00:00:00Z');
+
       const userId = 'testUserId';
       const sessionKeys = ['session:testUserId:session1', 'session:testUserId:session2'];
       const sessionData = [
-        { sessionHash: 'hash1', createdAt: new Date().toISOString() },
-        { sessionHash: 'hash2', createdAt: new Date().toISOString() },
+        { sessionHash: 'hash1', createdAt: date1Mock.toISOString() },
+        { sessionHash: 'hash2', createdAt: date2Mock.toISOString() },
       ];
 
       redisServiceMock.listKeys.mockResolvedValue(sessionKeys);
@@ -176,8 +179,11 @@ describe(SessionsService.name, () => {
 
       const result = await service.getSessionsForUser(userId);
 
-      const sessionDataWithDate = sessionData.map((data) => ({ ...data, createdAt: new Date(data.createdAt) }));
-      expect(result).toEqual(sessionDataWithDate);
+      const expectedSessionData = [
+        { sessionId: 'session1', createdAt: date1Mock },
+        { sessionId: 'session2', createdAt: date2Mock },
+      ];
+      expect(result).toEqual(expectedSessionData);
       expect(redisServiceMock.listKeys).toHaveBeenCalledWith('session:testUserId:*');
       expect(redisServiceMock.get).toHaveBeenCalledTimes(2);
     });
@@ -193,7 +199,7 @@ describe(SessionsService.name, () => {
 
       const result = await service.getSessionsForUser(userId);
 
-      expect(result).toEqual([{ sessionHash: 'hash2', createdAt: expect.any(Date) }]);
+      expect(result).toEqual([{ sessionId: 'session2', createdAt: expect.any(Date) }]);
       expect(redisServiceMock.get).toHaveBeenCalledTimes(2);
     });
 
