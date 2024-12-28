@@ -5,23 +5,23 @@ import { UserResponseDto } from './dto/user-response.dto';
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { LoggedGuard } from '@src/auth/guards/logged.guard';
 import { UserId } from '@src/auth/decorators/userId.decorator';
+import { UserRegisterResponseDto } from './dto/user-register-response.dto';
 
 @ApiTags('users')
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @ApiCreatedResponse({ type: UserResponseDto })
+  @ApiCreatedResponse({ type: UserRegisterResponseDto })
   @Post('register')
-  async register(@Body() registerDto: UserRegisterDto) {
-    const user = await this.usersService.createUser(registerDto);
-    return new UserResponseDto(user);
+  async register(@Body() registerDto: UserRegisterDto): Promise<UserRegisterResponseDto> {
+    return await this.usersService.registerUser(registerDto);
   }
 
   @UseGuards(LoggedGuard)
   @ApiOkResponse({ type: UserResponseDto })
   @Get('me')
-  async me(@UserId() userId: string) {
+  async me(@UserId() userId: string): Promise<UserResponseDto> {
     const user = await this.usersService.findUserById(userId);
     return new UserResponseDto(user);
   }

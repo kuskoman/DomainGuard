@@ -20,8 +20,8 @@ import { RedisModule } from './lib/redis/redis.module';
     UsersModule,
     AuthModule,
     EncryptionModule,
-    SessionsModule,
     RedisModule,
+    SessionsModule,
   ],
 })
 export class AppModule {}

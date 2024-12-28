@@ -3,7 +3,7 @@ import { UsersService } from '@src/users/users.service';
 import { EncryptionService } from '@src/encryption/encryption.service';
 import { User } from '@prisma/client';
 import { AuthService } from './auth.service';
-import { baseConfig } from '@src/config/base.config';
+import { SessionsService } from '@src/sessions/sessions.service';
 
 const mockUser = {
   id: '1',
@@ -11,17 +11,16 @@ const mockUser = {
   passwordDigest: 'encryptedPassword',
 } as User;
 
-const baseConfigMock = {
-  sessionTime: 3600,
-};
-
-const mockUsersService = {
+const usersServiceMock = {
   findUserByEmail: jest.fn().mockResolvedValue(mockUser),
 };
 
-const mockEncryptionService = {
-  comparePassword: jest.fn().mockResolvedValue(true),
-  sign: jest.fn().mockReturnValue('token'),
+const encryptionServiceMock = {
+  compare: jest.fn().mockResolvedValue(true),
+};
+
+const sessionsServiceMock = {
+  createSession: jest.fn().mockResolvedValue('sessionToken'),
 };
 
 describe(AuthService.name, () => {
@@ -33,15 +32,15 @@ describe(AuthService.name, () => {
         AuthService,
         {
           provide: UsersService,
-          useValue: mockUsersService,
+          useValue: usersServiceMock,
         },
         {
           provide: EncryptionService,
-          useValue: mockEncryptionService,
+          useValue: encryptionServiceMock,
         },
         {
-          provide: baseConfig.KEY,
-          useValue: baseConfigMock,
+          provide: SessionsService,
+          useValue: sessionsServiceMock,
         },
       ],
     }).compile();
@@ -49,20 +48,40 @@ describe(AuthService.name, () => {
     authService = moduleRef.get<AuthService>(AuthService);
   });
 
+  afterEach(jest.clearAllMocks);
+
   describe('validateUser', () => {
     it('should return a user when the email and password are valid', async () => {
-      await expect(authService.validateUser('test@example.com', 'password')).resolves.toEqual(mockUser);
+      const result = await authService.validateUser('test@example.com', 'password');
+      expect(result).toEqual(mockUser);
+      expect(usersServiceMock.findUserByEmail).toHaveBeenCalledWith('test@example.com');
+      expect(encryptionServiceMock.compare).toHaveBeenCalledWith('password', mockUser.passwordDigest);
     });
 
     it('should return null when the password is invalid', async () => {
-      mockEncryptionService.comparePassword.mockResolvedValue(false);
-      await expect(authService.validateUser('test@example.com', 'password')).resolves.toBeNull();
+      encryptionServiceMock.compare.mockResolvedValueOnce(false);
+      const result = await authService.validateUser('test@example.com', 'password');
+      expect(result).toBeNull();
+      expect(usersServiceMock.findUserByEmail).toHaveBeenCalledWith('test@example.com');
+      expect(encryptionServiceMock.compare).toHaveBeenCalledWith('password', mockUser.passwordDigest);
+    });
+
+    it('should throw an error if the user is not found', async () => {
+      usersServiceMock.findUserByEmail.mockResolvedValueOnce(null);
+      await expect(authService.validateUser('nonexistent@example.com', 'password')).rejects.toThrowError();
     });
   });
 
   describe('login', () => {
     it('should return an access token for the user', async () => {
-      await expect(authService.login(mockUser)).resolves.toEqual({ access_token: 'token' });
+      const result = await authService.login(mockUser);
+      expect(result).toEqual({ access_token: 'sessionToken' });
+      expect(sessionsServiceMock.createSession).toHaveBeenCalledWith(mockUser.id);
+    });
+
+    it('should throw an error if session creation fails', async () => {
+      sessionsServiceMock.createSession.mockRejectedValueOnce(new Error('Session creation failed'));
+      await expect(authService.login(mockUser)).rejects.toThrow('Session creation failed');
     });
   });
 });

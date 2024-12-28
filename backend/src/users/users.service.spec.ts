@@ -4,12 +4,13 @@ import { DbService } from '@src/lib/db/db.service';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaPromise, User } from '@prisma/client';
 import { EncryptionService } from '@src/encryption/encryption.service';
+import { SessionsService } from '@src/sessions/sessions.service';
 
 describe(UsersService.name, () => {
   let service: UsersService;
   let dbService: DbService;
 
-  const mockDbService = {
+  const dbServiceMock = {
     user: {
       findUnique: jest.fn(),
       create: jest.fn(),
@@ -20,15 +21,20 @@ describe(UsersService.name, () => {
   };
 
   const encryptionServiceMock = {
-    hashPassword: jest.fn(() => 'hashedPassword'),
+    hash: jest.fn(() => 'hashedPassword'),
+  };
+
+  const sessionsServiceMock = {
+    createSession: jest.fn(),
   };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UsersService,
-        { provide: DbService, useValue: mockDbService },
+        { provide: DbService, useValue: dbServiceMock },
         { provide: EncryptionService, useValue: encryptionServiceMock },
+        { provide: SessionsService, useValue: sessionsServiceMock },
       ],
     }).compile();
 
@@ -58,7 +64,7 @@ describe(UsersService.name, () => {
       jest.spyOn(dbService.user, 'create').mockResolvedValueOnce({ email: 'test@test.com' } as User);
 
       await service.createUser({ email: 'test@test.com', password: 'test' });
-      expect(encryptionServiceMock.hashPassword).toHaveBeenCalledWith('test');
+      expect(encryptionServiceMock.hash).toHaveBeenCalledWith('test');
 
       expect(dbService.user.create).toHaveBeenCalledWith({
         data: {

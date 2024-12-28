@@ -15,7 +15,7 @@ describe(LoggedGuard.name, () => {
 
   afterEach(jest.clearAllMocks);
 
-  it('should throw UnauthorizedException if user is not attached to request', async () => {
+  it('should throw UnauthorizedException if userId and sessionId are not attached to request', async () => {
     const mockExecutionContext = {
       switchToHttp: () => ({
         getRequest: () => ({}),
@@ -25,7 +25,7 @@ describe(LoggedGuard.name, () => {
     await expect(guard.canActivate(mockExecutionContext)).rejects.toThrow(UnauthorizedException);
   });
 
-  it('should throw UnauthorizedException if user is missing required fields', async () => {
+  it('should throw UnauthorizedException if userId or sessionId is missing', async () => {
     const mockExecutionContext = {
       switchToHttp: () => ({
         getRequest: () => ({ sessionId: 'session123' }), // Missing userId
@@ -33,9 +33,17 @@ describe(LoggedGuard.name, () => {
     } as ExecutionContext;
 
     await expect(guard.canActivate(mockExecutionContext)).rejects.toThrow(UnauthorizedException);
+
+    const mockExecutionContextMissingSessionId = {
+      switchToHttp: () => ({
+        getRequest: () => ({ userId: 'testUser' }), // Missing sessionId
+      }),
+    } as ExecutionContext;
+
+    await expect(guard.canActivate(mockExecutionContextMissingSessionId)).rejects.toThrow(UnauthorizedException);
   });
 
-  it('should return true if user is authenticated', async () => {
+  it('should return true if userId and sessionId are present on the request', async () => {
     const mockExecutionContext = {
       switchToHttp: () => ({
         getRequest: () => ({ userId: 'testUser', sessionId: 'session123' }),

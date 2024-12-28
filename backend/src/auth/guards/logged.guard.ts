@@ -18,6 +18,7 @@ export class LoggedGuard implements CanActivate {
   }
 
   private isRequestWithUser(request: Request): request is Request & { userId: string; sessionId: string } {
-    return !!(request as any).user;
+    const requestAsAny = request as any;
+    return typeof requestAsAny.userId === 'string' && typeof requestAsAny.sessionId === 'string';
   }
 }
