@@ -75,7 +75,7 @@ describe(AuthService.name, () => {
   describe('login', () => {
     it('should return an access token for the user', async () => {
       const result = await authService.login(mockUser);
-      expect(result).toEqual({ access_token: 'sessionToken' });
+      expect(result).toEqual({ accessToken: 'sessionToken' });
       expect(sessionsServiceMock.createSession).toHaveBeenCalledWith(mockUser.id);
     });
 

@@ -25,6 +25,6 @@ export class AuthService {
 
   public async login(user: User) {
     const token = await this.sessionsService.createSession(user.id);
-    return { access_token: token };
+    return { accessToken: token };
   }
 }

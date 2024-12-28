@@ -12,7 +12,7 @@ export class AuthController {
 
   @ApiCreatedResponse({ type: LoginResponseDto })
   @Post('login')
-  async login(@Body() loginDto: UserLoginDto) {
+  async login(@Body() loginDto: UserLoginDto): Promise<LoginResponseDto> {
     this.logger.debug(`Login attempt for ${loginDto.email}`);
     const user = await this.authService.validateUser(loginDto.email, loginDto.password);
     if (!user) {
