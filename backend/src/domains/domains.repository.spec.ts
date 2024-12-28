@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { DbService } from '@src/db/db.service';
+import { DbService } from '@src/lib/db/db.service';
 import { DomainsRepository } from './domains.repository';
 import {
   CreateDomainInput,

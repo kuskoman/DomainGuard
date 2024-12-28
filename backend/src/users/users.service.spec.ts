@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UsersService } from './users.service';
-import { DbService } from '@src/db/db.service';
+import { DbService } from '@src/lib/db/db.service';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaPromise, User } from '@prisma/client';
 import { EncryptionService } from '@src/encryption/encryption.service';

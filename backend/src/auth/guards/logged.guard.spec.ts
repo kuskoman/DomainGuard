@@ -1,82 +1,49 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { LoggedGuard } from './logged.guard';
-import { EncryptionService } from '@src/encryption/encryption.service';
-import { AuthJwtPayload } from '../auth.interfaces';
+import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
 
 describe(LoggedGuard.name, () => {
-  let loggedGuard: LoggedGuard;
+  let guard: LoggedGuard;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        LoggedGuard,
-        {
-          provide: EncryptionService,
-          useValue: encryptionServiceMock,
-        },
-      ],
+      providers: [LoggedGuard],
     }).compile();
 
-    loggedGuard = module.get<LoggedGuard>(LoggedGuard);
+    guard = module.get<LoggedGuard>(LoggedGuard);
   });
 
-  it('should be defined', () => {
-    expect(loggedGuard).toBeDefined();
-  });
+  afterEach(jest.clearAllMocks);
 
-  it('should allow a request with a valid token', async () => {
-    const request = {
-      headers: {
-        authorization: 'Bearer token',
-      },
-    };
-
-    const context = {
+  it('should throw UnauthorizedException if user is not attached to request', async () => {
+    const mockExecutionContext = {
       switchToHttp: () => ({
-        getRequest: () => request,
+        getRequest: () => ({}),
       }),
-    } as unknown as ExecutionContext;
+    } as ExecutionContext;
 
-    const authJwtPayload = { sub: 'user-id' } as AuthJwtPayload;
-
-    encryptionServiceMock.verify.mockImplementation(() => authJwtPayload);
-
-    await expect(loggedGuard.canActivate(context)).resolves.toBe(true);
-    expect((request as Record<string, unknown>).userId).toEqual(authJwtPayload.sub);
+    await expect(guard.canActivate(mockExecutionContext)).rejects.toThrow(UnauthorizedException);
   });
 
-  it('should reject a request with an invalid token', async () => {
-    const context = {
+  it('should throw UnauthorizedException if user is missing required fields', async () => {
+    const mockExecutionContext = {
       switchToHttp: () => ({
-        getRequest: () => ({
-          headers: {
-            authorization: 'Bearer invalid',
-          },
-        }),
+        getRequest: () => ({ sessionId: 'session123' }), // Missing userId
       }),
-    } as unknown as ExecutionContext;
+    } as ExecutionContext;
 
-    encryptionServiceMock.verify.mockImplementation(() => {
-      throw new Error();
-    });
-
-    await expect(loggedGuard.canActivate(context)).rejects.toThrow(UnauthorizedException);
+    await expect(guard.canActivate(mockExecutionContext)).rejects.toThrow(UnauthorizedException);
   });
 
-  it('should reject a request without a token', async () => {
-    const context = {
+  it('should return true if user is authenticated', async () => {
+    const mockExecutionContext = {
       switchToHttp: () => ({
-        getRequest: () => ({
-          headers: {},
-        }),
+        getRequest: () => ({ userId: 'testUser', sessionId: 'session123' }),
       }),
-    } as unknown as ExecutionContext;
+    } as ExecutionContext;
 
-    await expect(loggedGuard.canActivate(context)).rejects.toThrow(UnauthorizedException);
+    const result = await guard.canActivate(mockExecutionContext);
+
+    expect(result).toBe(true);
   });
 });
-
-const encryptionServiceMock = {
-  verify: jest.fn(),
-};

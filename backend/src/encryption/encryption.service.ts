@@ -6,11 +6,11 @@ import { randomBytes } from 'crypto';
 export class EncryptionService {
   constructor() {}
 
-  public async hashPassword(password: string): Promise<string> {
+  public async hash(password: string): Promise<string> {
     return bcrypt.hash(password, 10);
   }
 
-  public async comparePassword(password: string, hashedPassword: string): Promise<boolean> {
+  public async compare(password: string, hashedPassword: string): Promise<boolean> {
     return bcrypt.compare(password, hashedPassword);
   }
 

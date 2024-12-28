@@ -14,12 +14,12 @@ describe(EncryptionService.name, () => {
 
   describe('hashPassword', () => {
     it('should return a string', async () => {
-      const result = await service.hashPassword('testPassword');
+      const result = await service.hash('testPassword');
       expect(typeof result).toBe('string');
     });
 
     it('should not return the same value', async () => {
-      const result = await service.hashPassword('testPassword');
+      const result = await service.hash('testPassword');
       expect(result).not.toEqual('testPassword');
     });
   });
@@ -27,15 +27,15 @@ describe(EncryptionService.name, () => {
   describe('comparePassword', () => {
     it('should return true for matching passwords', async () => {
       const password = 'testPassword';
-      const hashedPassword = await service.hashPassword(password);
-      const result = await service.comparePassword(password, hashedPassword);
+      const hashedPassword = await service.hash(password);
+      const result = await service.compare(password, hashedPassword);
       expect(result).toBe(true);
     });
 
     it('should return false for non-matching passwords', async () => {
       const password = 'testPassword';
-      const hashedPassword = await service.hashPassword(password);
-      const result = await service.comparePassword('wrongPassword', hashedPassword);
+      const hashedPassword = await service.hash(password);
+      const result = await service.compare('wrongPassword', hashedPassword);
       expect(result).toBe(false);
     });
   });

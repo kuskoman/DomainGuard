@@ -1,25 +1,20 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { EncryptionService } from '@src/encryption/encryption.service';
 import { UsersService } from '@src/users/users.service';
-import { AuthJwtPayload } from './auth.interfaces';
-import { BaseConfig, baseConfig } from '@src/config/base.config';
+import { SessionsService } from '@src/sessions/sessions.service';
 
 @Injectable()
 export class AuthService {
-  private readonly sessionTime: number;
-
   constructor(
     private readonly usersService: UsersService,
     private readonly encryptionService: EncryptionService,
-    @Inject(baseConfig.KEY) appBaseConfig: BaseConfig,
-  ) {
-    this.sessionTime = appBaseConfig.sessionTime;
-  }
+    private readonly sessionsService: SessionsService,
+  ) {}
 
   public async validateUser(email: string, password: string) {
     const user = await this.usersService.findUserByEmail(email);
-    const isPasswordValid = await this.encryptionService.comparePassword(password, user.passwordDigest);
+    const isPasswordValid = await this.encryptionService.compare(password, user.passwordDigest);
 
     if (!isPasswordValid) {
       return null;
@@ -29,8 +24,7 @@ export class AuthService {
   }
 
   public async login(user: User) {
-    const payload: AuthJwtPayload = { email: user.email, sub: user.id };
-    const token = this.encryptionService.sign(payload, this.sessionTime);
+    const token = await this.sessionsService.createSession(user.id);
     return { access_token: token };
   }
 }

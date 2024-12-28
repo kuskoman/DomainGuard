@@ -1,11 +1,7 @@
 import { Request } from 'express';
 
-export interface AuthJwtPayload {
-  email: string;
-  sub: string;
-}
-
 export interface RequestWithAuth extends Request {
   userId?: string;
+  sessionId?: string;
   authorization?: string;
 }

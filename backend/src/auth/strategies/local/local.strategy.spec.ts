@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { LocalStrategy } from './local.strategy';
-import { AuthService } from '../auth.service';
+import { AuthService } from '../../auth.service';
 import { UnauthorizedException } from '@nestjs/common';
 import { User } from '@prisma/client';
 

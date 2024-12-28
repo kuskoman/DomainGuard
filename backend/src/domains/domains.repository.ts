@@ -1,5 +1,5 @@
 import { Injectable, UnprocessableEntityException } from '@nestjs/common';
-import { DbService } from '@src/db/db.service';
+import { DbService } from '@src/lib/db/db.service';
 import {
   CreateDomainInput,
   FindDomainsByUserInput,

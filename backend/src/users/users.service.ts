@@ -1,12 +1,23 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { DbService } from '@src/db/db.service';
+import { DbService } from '@src/lib/db/db.service';
 import { EncryptionService } from '@src/encryption/encryption.service';
 import { UserCustomCreateInput, UserCustomUpdateInput } from './users.interfaces';
+import { SessionsService } from '@src/sessions/sessions.service';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly db: DbService, private readonly encryptionService: EncryptionService) {}
+  constructor(
+    private readonly db: DbService,
+    private readonly encryptionService: EncryptionService,
+    private readonly sessionsService: SessionsService,
+  ) {}
+
+  public async registerUser(userInput: UserCustomCreateInput) {
+    const user = await this.createUser(userInput);
+    const accessToken = await this.sessionsService.createSession(user.id);
+    return { accessToken, user };
+  }
 
   public async createUser(userInput: UserCustomCreateInput) {
     const existingUser = await this.db.user.findUnique({ where: { email: userInput.email } });
@@ -15,7 +26,7 @@ export class UsersService {
     }
 
     const { password, ...restOfUser } = userInput;
-    const passwordDigest = await this.encryptionService.hashPassword(password);
+    const passwordDigest = await this.encryptionService.hash(password);
     const userData: Prisma.UserCreateInput = { ...restOfUser, passwordDigest };
 
     return this.db.user.create({ data: userData });

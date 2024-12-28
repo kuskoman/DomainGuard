@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { DomainsRepository } from './domains.repository';
-import { DbService } from '@src/db/db.service';
+import { DbService } from '@src/lib/db/db.service';
 import {
   CreateDomainInput,
   FindDomainsByUserInput,
