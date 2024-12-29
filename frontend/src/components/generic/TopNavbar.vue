@@ -6,7 +6,7 @@
     <v-app-bar-title>DomainGuard</v-app-bar-title>
     <v-spacer></v-spacer>
     <template v-if="isLoggedIn">
-      <v-btn :to="'/profile'">Profile</v-btn>
+      <v-btn :to="'/user/profile'">Profile</v-btn>
       <v-btn @click="logout">Logout</v-btn>
     </template>
     <template v-else>

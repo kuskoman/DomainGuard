@@ -18,26 +18,27 @@ const formattedDate = computed(() => {
 
 const timeAgo = ref("");
 
+const timeUnits = [
+  { threshold: 60, unit: "second", divisor: 1 }, // Up to 60 seconds
+  { threshold: 3600, unit: "minute", divisor: 60 }, // Up to 1 hour
+  { threshold: 86400, unit: "hour", divisor: 3600 }, // Up to 1 day
+  { threshold: 2592000, unit: "day", divisor: 86400 }, // Up to 30 days
+  { threshold: 31536000, unit: "month", divisor: 2592000 }, // Up to 1 year
+  { threshold: Infinity, unit: "year", divisor: 31536000 }, // Over 1 year
+];
+
 const updateTimeAgo = () => {
   const now = new Date();
-  const diffInSeconds = Math.floor((now.getTime() - dateValue.value.getTime()) / 1000);
+  const diffInSeconds = Math.floor((dateValue.value.getTime() - now.getTime()) / 1000);
+  const absoluteDiff = Math.abs(diffInSeconds);
 
-  if (diffInSeconds < 60) {
-    timeAgo.value = `${diffInSeconds} seconds ago`;
-  } else if (diffInSeconds < 3600) {
-    timeAgo.value = `${Math.floor(diffInSeconds / 60)} minutes ago`;
-  } else if (diffInSeconds < 86400) {
-    timeAgo.value = `${Math.floor(diffInSeconds / 3600)} hours ago`;
-  } else if (diffInSeconds < 2592000) {
-    timeAgo.value = `${Math.floor(diffInSeconds / 86400)} days ago`;
-  } else if (diffInSeconds < 31536000) {
-    timeAgo.value = `${Math.floor(diffInSeconds / 2592000)} months ago`;
-  } else {
-    timeAgo.value = `${Math.floor(diffInSeconds / 31536000)} years ago`;
-  }
+  const { unit, divisor } = timeUnits.find(({ threshold }) => absoluteDiff < threshold)!;
+  const value = Math.floor(absoluteDiff / divisor);
+  const suffix = diffInSeconds < 0 ? "ago" : "from now";
+
+  timeAgo.value = `${value} ${unit}${value > 1 ? "s" : ""} ${suffix}`;
 };
 
-// Update the time ago on mount and when the date prop changes
 onMounted(updateTimeAgo);
 watch(() => props.date, updateTimeAgo);
 </script>
