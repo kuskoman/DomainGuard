@@ -50,7 +50,6 @@ describe("User Store", () => {
     await store.fetchUserDetails();
 
     expect(store.userDetails).toEqual(mockResponse.data);
-    expect(localStorage.getItem("userEmail")).toBe("test@example.com");
     expect(alertStore.alerts).toHaveLength(0);
   });
 

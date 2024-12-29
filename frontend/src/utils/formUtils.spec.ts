@@ -38,4 +38,30 @@ describe("Validation Utils", () => {
       expect(minLength("")).toBe("Min 6 characters.");
     });
   });
+
+  describe("domain", () => {
+    it("returns true for valid domain names", () => {
+      const validDomains = [
+        "example.com",
+        "sub.domain.com",
+        "sub.domain.co.uk",
+        "sub.domain.io",
+        "domain.w1th.numb3rs.pl",
+        "domain.with-dashes.pl",
+        "domain.with-ś-ą-ć.pl",
+      ];
+
+      validDomains.forEach((domain) => {
+        expect(rules.domain(domain)).toBe(true);
+      });
+    });
+
+    it("returns 'Enter a valid domain name.' for invalid domain names", () => {
+      const invalidDomains = ["invalid domain", "invalid-domain", "ęąśźć"];
+
+      invalidDomains.forEach((domain) => {
+        expect(rules.domain(domain)).toBe("Enter a valid domain name.");
+      });
+    });
+  });
 });

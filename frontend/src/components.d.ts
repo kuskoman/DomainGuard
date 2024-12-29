@@ -10,6 +10,7 @@ declare module 'vue' {
     AlertsBar: typeof import('./components/generic/AlertsBar.vue')['default']
     'AlertsBar.spec': typeof import('./components/generic/AlertsBar.spec')['default']
     AppFooter: typeof import('./components/generic/AppFooter.vue')['default']
+    DomainForm: typeof import('./components/domains/DomainForm.vue')['default']
     FormattedDate: typeof import('./components/generic/FormattedDate.vue')['default']
     HelloWorld: typeof import('./components/generic/HelloWorld.vue')['default']
     LoginForm: typeof import('./components/auth/LoginForm.vue')['default']
