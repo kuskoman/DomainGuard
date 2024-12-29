@@ -59,6 +59,14 @@ export class DomainsService {
   }
 
   public async updateDomainExpirationDateWithUser(id: string, userId: string) {
+    if (!id) {
+      throw new UnprocessableEntityException('Id is required');
+    }
+
+    if (!userId) {
+      throw new UnprocessableEntityException('User id is required');
+    }
+
     const input: FindDomainInput = { id };
     const domain = await this.repository.findOne(input);
     if (!domain || domain.userId !== userId) {

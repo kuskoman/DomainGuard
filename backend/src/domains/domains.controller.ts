@@ -1,4 +1,4 @@
-import { Body, Controller, Logger, Post, Get, UseGuards, NotFoundException } from '@nestjs/common';
+import { Body, Controller, Logger, Post, Get, UseGuards, NotFoundException, Param } from '@nestjs/common';
 import { CreateDomainDto } from './dto/createDomainDto';
 import { DomainsService } from './domains.service';
 import { LoggedGuard } from '@src/auth/guards/logged.guard';
@@ -42,7 +42,7 @@ export class DomainsController {
   }
 
   @Post(':id/refresh')
-  async refreshDomainExpiration(@UserId() userId: string, @Body() { id }: { id: string }) {
+  async refreshDomainExpiration(@UserId() userId: string, @Param() { id }: { id: string }) {
     this.logger.log(`Refreshing domain ${id} for user ${userId}`);
 
     return this.domainsService.updateDomainExpirationDateWithUser(id, userId);
