@@ -7,7 +7,7 @@
           DomainGuard is a powerful tool for monitoring the validity of domains and SSL certificates, ensuring online
           safety for businesses and individuals.
         </p>
-        <v-btn color="primary" large elevation="2" to="/user/register"> Get Started </v-btn>
+        <v-btn color="primary" large elevation="2" :to="getStartedLink"> Get Started </v-btn>
       </v-col>
     </v-row>
     <v-row class="mt-10">
@@ -40,6 +40,18 @@
     </v-row>
   </v-container>
 </template>
+
+<script setup lang="ts">
+import { computed } from "vue";
+import { useUserStore } from "@/stores/user";
+
+const userStore = useUserStore();
+
+const registerLink = "/user/register";
+const domainsLink = "/domains";
+
+const getStartedLink = computed(() => (userStore.accessToken ? domainsLink : registerLink));
+</script>
 
 <style lang="scss" scoped>
 h1 {
