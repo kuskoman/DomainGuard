@@ -8,12 +8,14 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     AlertsBar: typeof import('./components/generic/AlertsBar.vue')['default']
+    AppBar: typeof import('./components/generic/navigation/AppBar.vue')['default']
     AppFooter: typeof import('./components/generic/AppFooter.vue')['default']
     DomainCard: typeof import('./components/domains/DomainCard.vue')['default']
     DomainForm: typeof import('./components/domains/DomainForm.vue')['default']
     DomainList: typeof import('./components/domains/DomainList.vue')['default']
     FormattedDate: typeof import('./components/generic/FormattedDate.vue')['default']
     LoginForm: typeof import('./components/auth/LoginForm.vue')['default']
+    NavigationDrawer: typeof import('./components/generic/navigation/NavigationDrawer.vue')['default']
     ProfileInfo: typeof import('./components/profile/ProfileInfo.vue')['default']
     RegisterForm: typeof import('./components/auth/RegisterForm.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
