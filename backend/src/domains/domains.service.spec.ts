@@ -179,4 +179,32 @@ describe(DomainsRepository.name, () => {
       });
     });
   });
+
+  describe('findDomainsNotCheckedInLastDays', () => {
+    it('should find domains that were not checked in the last days', async () => {
+      const days = 30;
+      const date = new Date();
+      date.setDate(date.getDate() - days);
+      const mockedResult = [testDomain];
+      mockDbService.domain.findMany.mockResolvedValueOnce(mockedResult);
+
+      const result = await repository.findDomainsNotCheckedInLastDays(days);
+
+      expect(result).toEqual(mockedResult);
+      expect(mockDbService.domain.findMany).toHaveBeenCalledWith({
+        where: {
+          OR: [
+            {
+              lastCheckedAt: {
+                lt: date,
+              },
+            },
+            {
+              lastCheckedAt: null,
+            },
+          ],
+        },
+      });
+    });
+  });
 });

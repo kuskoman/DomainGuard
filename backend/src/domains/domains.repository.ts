@@ -35,30 +35,30 @@ export class DomainsRepository {
     });
   }
 
-  public findAllWithUser(input: FindDomainsByUserInput) {
+  public async findAllWithUser(input: FindDomainsByUserInput) {
     const { userId } = input;
 
     if (!userId) {
-      return this.db.domain.findMany();
+      return await this.db.domain.findMany();
     }
 
-    return this.db.domain.findMany({
+    return await this.db.domain.findMany({
       where: {
         user: { id: userId },
       },
     });
   }
 
-  public findOneWithUser(input: FindDomainInput) {
+  public async findOneWithUser(input: FindDomainInput) {
     const { id, userId } = input;
 
     if (!userId) {
-      return this.db.domain.findFirst({
+      return await this.db.domain.findFirst({
         where: { id },
       });
     }
 
-    return this.db.domain.findFirst({
+    return await this.db.domain.findFirst({
       where: {
         id,
         user: { id: userId },
@@ -66,16 +66,16 @@ export class DomainsRepository {
     });
   }
 
-  public removeWithUser(input: RemoveDomainInput) {
+  public async removeWithUser(input: RemoveDomainInput) {
     const { id, userId } = input;
 
     if (!userId) {
-      return this.db.domain.delete({
+      return await this.db.domain.delete({
         where: { id },
       });
     }
 
-    return this.db.domain.delete({
+    return await this.db.domain.delete({
       where: {
         id,
         user: { id: userId },
@@ -83,32 +83,45 @@ export class DomainsRepository {
     });
   }
 
-  public findAll() {
-    return this.db.domain.findMany();
+  public async findAll() {
+    return await this.db.domain.findMany();
   }
 
-  public findOne(input: FindDomainInput) {
+  public async findOne(input: FindDomainInput) {
     const { id } = input;
 
-    return this.db.domain.findUnique({
+    return await this.db.domain.findUnique({
       where: { id },
     });
   }
 
-  public remove(input: RemoveDomainInput) {
+  public async remove(input: RemoveDomainInput) {
     const { id } = input;
 
-    return this.db.domain.delete({
+    return await this.db.domain.delete({
       where: { id },
     });
   }
 
-  public updateExpirationDate(input: UpdateExpirationDateInput) {
+  public async updateExpirationDate(input: UpdateExpirationDateInput) {
     const { id, expirationDate } = input;
 
-    return this.db.domain.update({
+    return await this.db.domain.update({
       where: { id },
       data: { expirationDate, lastCheckedAt: new Date() },
+    });
+  }
+
+  public async findDomainsNotCheckedInLastDays(days: number) {
+    const date = new Date();
+    date.setDate(date.getDate() - days);
+
+    return await this.db.domain.findMany({
+      where: {
+        lastCheckedAt: {
+          lt: date,
+        },
+      },
     });
   }
 }
