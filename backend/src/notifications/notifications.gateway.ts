@@ -5,7 +5,7 @@ import { SessionsService } from '@src/sessions/sessions.service';
 import { Notification } from '@prisma/client';
 import { NotificationWebsocketDto } from './dto/notificationWebsocketDto';
 
-@WebSocketGateway({ namespace: 'notifications', cors: true })
+@WebSocketGateway({ namespace: 'api/notifications', cors: true })
 export class NotificationsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   private server: Server | undefined;
@@ -44,6 +44,7 @@ export class NotificationsGateway implements OnGatewayConnection, OnGatewayDisco
   }
 
   async sendNotification(notification: Notification) {
+    this.logger.verbose(`Sending notification ${notification.id} to user: ${notification.userId}`);
     const { userId } = notification;
     const notificationDto = new NotificationWebsocketDto(notification);
     const server = this.getServer();

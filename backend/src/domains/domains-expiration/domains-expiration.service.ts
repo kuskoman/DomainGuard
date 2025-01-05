@@ -14,6 +14,7 @@ export class DomainsExpirationService {
       return null;
     }
 
+    //const whoisExpirationDate = whoisData.registrarRegistrationExpirationDate || whoisData.optionExpirationDate
     const whoisExpirationDate = whoisData.registrarRegistrationExpirationDate;
     if (!whoisExpirationDate) {
       this.logger.warn(`Could not get expiration date for domain ${domain}`);

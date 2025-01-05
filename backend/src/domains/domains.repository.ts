@@ -118,9 +118,16 @@ export class DomainsRepository {
 
     return await this.db.domain.findMany({
       where: {
-        lastCheckedAt: {
-          lt: date,
-        },
+        OR: [
+          {
+            lastCheckedAt: {
+              lt: date,
+            },
+          },
+          {
+            lastCheckedAt: null,
+          },
+        ],
       },
     });
   }

@@ -31,7 +31,7 @@ export class DomainsController {
 
   @Get(':id')
   @ApiOkResponse({ type: GetDomainDto })
-  async findOne(@UserId() userId: string, @Body() { id }: { id: string }) {
+  async findOne(@UserId() userId: string, @Param() { id }: { id: string }) {
     this.logger.log(`Getting domain ${id} for user ${userId}`);
     const domain = await this.domainsService.findOneWithUser(id, userId);
     if (!domain || domain.userId !== userId) {

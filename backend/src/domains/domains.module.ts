@@ -5,10 +5,11 @@ import { SslCertificatesModule } from './ssl-certificates/ssl-certificates.modul
 import { DomainsController } from './domains.controller';
 import { EncryptionModule } from '@src/encryption/encryption.module';
 import { DomainsRepository } from './domains.repository';
+import { NotificationsModule } from '@src/notifications/notifications.module';
 
 @Module({
   providers: [DomainsService, DomainsRepository],
-  imports: [DomainsExpirationModule, SslCertificatesModule, EncryptionModule],
+  imports: [DomainsExpirationModule, SslCertificatesModule, EncryptionModule, NotificationsModule],
   controllers: [DomainsController],
 })
 export class DomainsModule {}

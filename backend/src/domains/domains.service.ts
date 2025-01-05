@@ -1,13 +1,9 @@
 import { Injectable, Logger, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { DomainsRepository } from './domains.repository';
 import { DomainsExpirationService } from './domains-expiration/domains-expiration.service';
-import {
-  CreateDomainInput,
-  FindDomainInput,
-  FindDomainsByUserInput,
-  RemoveDomainInput,
-  UpdateExpirationDateInput,
-} from './domains.interfaces';
+import { CreateDomainInput, FindDomainsByUserInput } from './domains.interfaces';
+import { NotificationsService } from '@src/notifications/notifications.service';
+import { NotificationTopic } from '@prisma/client';
 
 @Injectable()
 export class DomainsService {
@@ -16,22 +12,20 @@ export class DomainsService {
   constructor(
     private readonly repository: DomainsRepository,
     private readonly expirationService: DomainsExpirationService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   public async create(name: string, userId: string) {
     const input: CreateDomainInput = { name, userId };
-    const domainResponse = await this.repository.create(input);
+    const domain = await this.repository.create(input);
 
-    // todo: use a queue, or cqrs, or something else to handle this in the background
-    (async () => {
-      try {
-        await this.updateDomainExpirationDate(domainResponse.id);
-      } catch (error) {
-        this.logger.error(`Error updating domain expiration date: ${JSON.stringify(error)}`);
-      }
-    })();
+    this.logger.log(`Domain created: ${domain.name} (ID: ${domain.id}) for user ${userId}`);
 
-    return domainResponse;
+    this.updateDomainExpirationDate(domain.id).catch((error) =>
+      this.logger.error(`Error updating domain expiration date: ${JSON.stringify(error)}`),
+    );
+
+    return domain;
   }
 
   public async findAllWithUser(userId: string) {
@@ -40,46 +34,18 @@ export class DomainsService {
   }
 
   public async findOneWithUser(id: string, userId: string) {
-    const input: FindDomainInput = { id, userId };
-    const domain = await this.repository.findOneWithUser(input);
-    if (!domain) {
-      throw new NotFoundException(`Domain with id ${id} not found`);
-    }
-    return domain;
+    return this.findDomainWithUserValidation(id, userId);
   }
 
   public async removeWithUser(id: string, userId: string) {
-    const input: FindDomainInput = { id };
-    const domain = await this.repository.findOne(input);
-    if (!domain || domain.userId !== userId) {
-      throw new NotFoundException(`Domain with id ${id} not found`);
-    }
-    const removeInput: RemoveDomainInput = { id };
-    return this.repository.removeWithUser(removeInput);
+    const domain = await this.findDomainWithUserValidation(id, userId);
+    this.logger.log(`Removing domain: ${domain.name} (ID: ${id}) for user ${userId}`);
+    return this.repository.removeWithUser({ id });
   }
 
   public async updateDomainExpirationDateWithUser(id: string, userId: string) {
-    if (!id) {
-      throw new UnprocessableEntityException('Id is required');
-    }
-
-    if (!userId) {
-      throw new UnprocessableEntityException('User id is required');
-    }
-
-    const input: FindDomainInput = { id };
-    const domain = await this.repository.findOne(input);
-    if (!domain || domain.userId !== userId) {
-      throw new NotFoundException(`Domain with id ${id} not found`);
-    }
-
-    const expirationDate = await this.expirationService.getExpirationDate(domain.name);
-    if (!expirationDate) {
-      throw new UnprocessableEntityException('Could not get expiration date');
-    }
-
-    const updateInput: UpdateExpirationDateInput = { id, expirationDate };
-    return this.repository.updateExpirationDate(updateInput);
+    await this.findDomainWithUserValidation(id, userId);
+    return this.updateDomainExpirationDate(id);
   }
 
   public async findAll() {
@@ -87,37 +53,60 @@ export class DomainsService {
   }
 
   public async findOne(id: string) {
-    const input: FindDomainInput = { id };
-    const domain = await this.repository.findOne(input);
-    if (!domain) {
-      throw new NotFoundException(`Domain with id ${id} not found`);
-    }
-    return domain;
+    return this.findDomainWithValidation(id);
   }
 
   public async remove(id: string) {
-    const input: FindDomainInput = { id };
-    const domain = await this.repository.findOne(input);
-    if (!domain) {
-      throw new NotFoundException(`Domain with id ${id} not found`);
-    }
-    const removeInput: RemoveDomainInput = { id };
-    return this.repository.remove(removeInput);
+    const domain = await this.findDomainWithValidation(id);
+    this.logger.log(`Removing domain: ${domain.name} (ID: ${id})`);
+    return this.repository.remove({ id });
   }
 
   public async updateDomainExpirationDate(id: string) {
-    const input: FindDomainInput = { id };
-    const domain = await this.repository.findOne(input);
-    if (!domain) {
-      throw new NotFoundException(`Domain with id ${id} not found`);
-    }
-
+    const domain = await this.findDomainWithValidation(id);
     const expirationDate = await this.expirationService.getExpirationDate(domain.name);
+
     if (!expirationDate) {
+      await this.notificationsService.createNotification(domain.userId, {
+        message: `Error updating expiration date for domain ${domain.name}`,
+        topic: NotificationTopic.DOMAIN_EXPIRATION,
+      });
       throw new UnprocessableEntityException('Could not get expiration date');
     }
 
-    const updateInput: UpdateExpirationDateInput = { id, expirationDate };
-    return this.repository.updateExpirationDate(updateInput);
+    const updatedDomain = await this.repository.updateExpirationDate({ id, expirationDate });
+
+    await this.notificationsService.createNotification(domain.userId, {
+      message: `Domain ${domain.name} expiration date updated successfully.`,
+      topic: NotificationTopic.DOMAIN_EXPIRATION,
+    });
+
+    return updatedDomain;
+  }
+
+  private async findDomainWithValidation(id: string) {
+    if (!id) {
+      throw new UnprocessableEntityException('Id is required');
+    }
+
+    const domain = await this.repository.findOne({ id });
+    if (!domain) {
+      throw new NotFoundException(`Domain with ID ${id} not found`);
+    }
+
+    return domain;
+  }
+
+  private async findDomainWithUserValidation(id: string, userId: string) {
+    if (!id || !userId) {
+      throw new UnprocessableEntityException('Id and userId are required');
+    }
+
+    const domain = await this.repository.findOneWithUser({ id, userId });
+    if (!domain) {
+      throw new NotFoundException(`Domain with ID ${id} not found for user ${userId}`);
+    }
+
+    return domain;
   }
 }
