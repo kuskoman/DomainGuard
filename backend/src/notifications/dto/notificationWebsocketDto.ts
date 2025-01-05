@@ -1,10 +1,10 @@
-import { Notification } from '@prisma/client';
+import { Notification, NotificationStatus, NotificationTopic } from '@prisma/client';
 
 export class NotificationWebsocketDto {
   id: string;
   message: string;
-  topic: string;
-  status: string;
+  topic: NotificationTopic;
+  status: NotificationStatus;
   createdAt: Date;
 
   constructor(notification: Notification) {
