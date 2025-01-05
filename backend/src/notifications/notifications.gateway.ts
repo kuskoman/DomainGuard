@@ -3,7 +3,7 @@ import { Logger, UnauthorizedException } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { SessionsService } from '@src/sessions/sessions.service';
 import { Notification } from '@prisma/client';
-import { GetNotificationDto } from './dto/notificationWebsocketDto';
+import { GetNotificationDto } from './dto/getNotificationDto';
 
 @WebSocketGateway({ namespace: 'api/notifications', cors: true })
 export class NotificationsGateway implements OnGatewayConnection, OnGatewayDisconnect {
