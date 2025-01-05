@@ -1,6 +1,6 @@
 import { Notification, NotificationStatus, NotificationTopic } from '@prisma/client';
 
-export class NotificationWebsocketDto {
+export class GetNotificationDto {
   id: string;
   message: string;
   topic: NotificationTopic;

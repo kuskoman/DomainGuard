@@ -31,6 +31,10 @@ export class NotificationsService {
     return this.notificationsRepository.findUnreadNotifications(userId);
   }
 
+  public async findAll(userId: string) {
+    return this.notificationsRepository.findAll(userId);
+  }
+
   public async markAllAsRead(userId: string) {
     return this.notificationsRepository.markAllAsRead(userId);
   }

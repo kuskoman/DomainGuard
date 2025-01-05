@@ -3,7 +3,7 @@ import { Logger, UnauthorizedException } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { SessionsService } from '@src/sessions/sessions.service';
 import { Notification } from '@prisma/client';
-import { NotificationWebsocketDto } from './dto/notificationWebsocketDto';
+import { GetNotificationDto } from './dto/notificationWebsocketDto';
 
 @WebSocketGateway({ namespace: 'api/notifications', cors: true })
 export class NotificationsGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -46,7 +46,7 @@ export class NotificationsGateway implements OnGatewayConnection, OnGatewayDisco
   async sendNotification(notification: Notification) {
     this.logger.verbose(`Sending notification ${notification.id} to user: ${notification.userId}`);
     const { userId } = notification;
-    const notificationDto = new NotificationWebsocketDto(notification);
+    const notificationDto = new GetNotificationDto(notification);
     const server = this.getServer();
     this.logger.verbose(`Sending notification to user: ${userId}`);
     server.to(userId).emit('notification', notificationDto);

@@ -41,6 +41,14 @@ export class NotificationsRepository {
     });
   }
 
+  public async findAll(userId: string) {
+    return await this.dbService.notification.findMany({
+      where: {
+        userId,
+      },
+    });
+  }
+
   public async findUnreadNotifications(userId: string) {
     return await this.dbService.notification.findMany({
       where: {
