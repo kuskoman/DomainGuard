@@ -24,6 +24,10 @@ export class NotificationsService {
   }
 
   public async markAsRead(userId: string, notificationId: string) {
+    if (!userId || !notificationId) {
+      this.logger.error(`Invalid userId: ${userId} or notificationId: ${notificationId}`);
+      throw new NotFoundException('Invalid userId or notificationId');
+    }
     return this.notificationsRepository.markAsRead(userId, notificationId);
   }
 

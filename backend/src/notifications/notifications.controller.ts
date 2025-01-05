@@ -1,11 +1,13 @@
-import { Controller, Get, Patch } from '@nestjs/common';
+import { Controller, Get, Param, Patch, UseGuards } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
 import { UserId } from '@src/auth/decorators/userId.decorator';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { GetNotificationDto } from './dto/getNotificationDto';
+import { LoggedGuard } from '@src/auth/guards/logged.guard';
 
 @Controller('notifications')
 @ApiTags('notifications')
+@UseGuards(LoggedGuard)
 export class NotificationsController {
   constructor(private readonly notificationsService: NotificationsService) {}
 
@@ -25,14 +27,14 @@ export class NotificationsController {
 
   @Get(':id')
   @ApiOkResponse({ type: GetNotificationDto })
-  public async getNotification(@UserId() userId: string, id: string): Promise<GetNotificationDto> {
+  public async getNotification(@UserId() userId: string, @Param('id') id: string): Promise<GetNotificationDto> {
     const notification = await this.notificationsService.get(userId, id);
     return new GetNotificationDto(notification);
   }
 
   @Patch(':id/read')
   @ApiOkResponse({ type: GetNotificationDto })
-  public async markAsRead(@UserId() userId: string, id: string): Promise<GetNotificationDto> {
+  public async markAsRead(@UserId() userId: string, @Param('id') id: string): Promise<GetNotificationDto> {
     const notification = await this.notificationsService.markAsRead(userId, id);
     return new GetNotificationDto(notification);
   }
