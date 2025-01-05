@@ -5,8 +5,11 @@ let socket: Socket | null = null;
 
 export const connectWebSocket = (accessToken: string, onNotification: (data: any) => void) => {
   if (socket) {
+    console.warn("WebSocket already connected.");
     disconnectWebSocket();
   }
+
+  console.log("Connecting WebSocket...");
 
   socket = io(`${BASE_URL}/api/notifications`, {
     auth: { token: accessToken },
@@ -18,7 +21,7 @@ export const connectWebSocket = (accessToken: string, onNotification: (data: any
 
   socket.on("notification", (data) => {
     console.log("New Notification:", data);
-    onNotification(data); // Call the provided callback
+    onNotification(data);
   });
 
   socket.on("error", (err) => {

@@ -39,9 +39,10 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import { useNotificationStore } from "@/stores/notifications";
+import { useNotificationsStore } from "@/stores/notifications";
 
-const notificationStore = useNotificationStore();
+const notificationStore = useNotificationsStore();
+notificationStore.connectWebSocket();
 
 const notifications = computed(() => notificationStore.notifications);
 const unreadCount = computed(() => notificationStore.unreadCount);

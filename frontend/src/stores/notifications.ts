@@ -1,5 +1,6 @@
 import { connectWebSocket, disconnectWebSocket } from "@/api/websocket";
 import { defineStore } from "pinia";
+import { useUserStore } from "./user";
 
 export type NotificationTopic = "DOMAIN_EXPIRATION" | "SSL_EXPIRATION";
 export type NotificationStatus = "UNREAD" | "READ";
@@ -16,7 +17,7 @@ export interface NotificationIncomingData extends Omit<Notification, "createdAt"
   createdAt: string;
 }
 
-export const useNotificationStore = defineStore("notifications", {
+export const useNotificationsStore = defineStore("notifications", {
   state: () => ({
     notifications: ((): Notification[] => [])(),
     websocketConnected: false,
@@ -30,13 +31,22 @@ export const useNotificationStore = defineStore("notifications", {
     },
   },
   actions: {
-    connectWebSocket(accessToken: string) {
-      if (this.websocketConnected) return;
+    connectWebSocket() {
+      if (this.websocketConnected) {
+        return;
+      }
+      const userStore = useUserStore();
+      const accessToken = userStore.accessToken;
+      if (!accessToken) {
+        return;
+      }
       connectWebSocket(accessToken, (data) => this.handleIncomingNotification(data));
       this.websocketConnected = true;
     },
     disconnectWebSocket() {
-      if (!this.websocketConnected) return;
+      if (!this.websocketConnected) {
+        return;
+      }
       disconnectWebSocket();
       this.websocketConnected = false;
     },

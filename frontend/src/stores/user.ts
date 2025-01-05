@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { apiClient } from "@/api/client";
-import { useNotificationStore } from "./notifications";
+import { connectWebSocket } from "@/api/websocket";
+import { useNotificationsStore } from "./notifications";
 
 export const useUserStore = defineStore("user", {
   state: () => ({
@@ -12,17 +13,13 @@ export const useUserStore = defineStore("user", {
       this.accessToken = token;
       localStorage.setItem("accessToken", token);
       apiClient.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-
-      const notificationStore = useNotificationStore();
-      notificationStore.connectWebSocket(token);
     },
     logout() {
       this.accessToken = "";
       localStorage.removeItem("accessToken");
       delete apiClient.defaults.headers.common["Authorization"];
-
-      const notificationStore = useNotificationStore();
-      notificationStore.disconnectWebSocket();
+      const notificationsStore = useNotificationsStore();
+      notificationsStore.disconnectWebSocket();
     },
   },
 });

@@ -23,6 +23,7 @@ import { useUserStore } from "@/stores/user";
 import { rules } from "@/utils/formUtils";
 import { ref, watch } from "vue";
 import { AxiosError } from "axios";
+import { useNotificationsStore } from "@/stores/notifications";
 
 const form = ref(null);
 const valid = ref(false);
@@ -32,6 +33,7 @@ const invalidCredentials = ref(false);
 
 const alertsStore = useAlertStore();
 const userStore = useUserStore();
+const notificationsStore = useNotificationsStore();
 
 watch([email, password], () => {
   invalidCredentials.value = false;
@@ -46,6 +48,7 @@ const submit = async () => {
     });
     const { accessToken } = data;
     userStore.setAccessToken(accessToken);
+    notificationsStore.connectWebSocket();
     alertsStore.addAlert(AlertType.Success, "User logged in successfully!");
     await router.push({
       name: "/user/profile",

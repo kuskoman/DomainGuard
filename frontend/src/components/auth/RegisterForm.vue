@@ -24,6 +24,7 @@ import { apiClient } from "@/api/client";
 import type { UserRegisterResponse } from "@/api/interfaces/users.responses";
 import router from "@/router";
 import { AlertType, useAlertStore } from "@/stores/alerts";
+import { useNotificationsStore } from "@/stores/notifications";
 import { useUserStore } from "@/stores/user";
 import { rules } from "@/utils/formUtils";
 import { ref, computed } from "vue";
@@ -36,6 +37,7 @@ const passwordConfirmation = ref("");
 
 const alertsStore = useAlertStore();
 const userStore = useUserStore();
+const notificationsStore = useNotificationsStore();
 
 const confirmPasswordRule = computed(() => {
   return (value: string) => value === password.value || "Passwords do not match";
@@ -47,9 +49,10 @@ const submit = async () => {
       email: email.value,
       password: password.value,
     });
-    const { accessToken, user } = data;
+    const { accessToken } = data;
     alertsStore.addAlert(AlertType.Success, "User registered successfully!");
     userStore.setAccessToken(accessToken);
+    notificationsStore.connectWebSocket();
     router.push({
       name: "/user/profile",
     });

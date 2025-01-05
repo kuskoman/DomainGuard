@@ -30,13 +30,14 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useUserStore } from "@/stores/user";
-import { useNotificationStore } from "@/stores/notifications";
+import { useNotificationsStore } from "@/stores/notifications";
 import router from "@/router";
 
 defineProps<{ toggleDrawer: (enabled: boolean) => void }>();
 
 const userStore = useUserStore();
-const notificationStore = useNotificationStore();
+const notificationStore = useNotificationsStore();
+notificationStore.connectWebSocket();
 
 const isLoggedIn = computed(() => !!userStore.accessToken);
 const unreadCount = computed(() => notificationStore.unreadCount);
