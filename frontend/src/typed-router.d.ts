@@ -22,6 +22,7 @@ declare module 'vue-router/auto-routes' {
     '/domains/': RouteRecordInfo<'/domains/', '/domains', Record<never, never>, Record<never, never>>,
     '/domains/[id]': RouteRecordInfo<'/domains/[id]', '/domains/:id', { id: ParamValue<true> }, { id: ParamValue<false> }>,
     '/domains/add': RouteRecordInfo<'/domains/add', '/domains/add', Record<never, never>, Record<never, never>>,
+    '/notifications': RouteRecordInfo<'/notifications', '/notifications', Record<never, never>, Record<never, never>>,
     '/user/login': RouteRecordInfo<'/user/login', '/user/login', Record<never, never>, Record<never, never>>,
     '/user/profile': RouteRecordInfo<'/user/profile', '/user/profile', Record<never, never>, Record<never, never>>,
     '/user/register': RouteRecordInfo<'/user/register', '/user/register', Record<never, never>, Record<never, never>>,
