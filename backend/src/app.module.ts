@@ -9,6 +9,7 @@ import { AuthModule } from './auth/auth.module';
 import { EncryptionModule } from './encryption/encryption.module';
 import { SessionsModule } from './sessions/sessions.module';
 import { RedisModule } from './lib/redis/redis.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { RedisModule } from './lib/redis/redis.module';
     EncryptionModule,
     RedisModule,
     SessionsModule,
+    NotificationsModule,
   ],
 })
 export class AppModule {}

@@ -52,25 +52,24 @@ model Notification {
   userId    String             @map("user_id")
   user      User               @relation(fields: [userId], references: [id])
   message   String
-  type      NotificationType
-  status    NotificationStatus
+  topic     NotificationTopic
+  status    NotificationStatus @default(UNREAD)
   createdAt DateTime           @default(now()) @map("created_at")
   updatedAt DateTime           @updatedAt @map("updated_at")
 
   @@map("notifications")
 }
 
-enum NotificationType {
-  DOMAIN_EXPIRATION
-  SSL_EXPIRATION
+enum NotificationTopic {
+  DOMAIN_EXPIRATION @map("domain_expiration")
+  SSL_EXPIRATION    @map("ssl_expiration")
 
   @@map("notification_types")
 }
 
 enum NotificationStatus {
-  PENDING
-  SENT
-  FAILED
+  UNREAD @map("unread")
+  READ   @map("read")
 
   @@map("notification_statuses")
 }
