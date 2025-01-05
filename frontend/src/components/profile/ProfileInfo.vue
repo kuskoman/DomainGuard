@@ -22,11 +22,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
-import { useUserStore } from "@/stores/user";
+import { ref, onMounted } from "vue";
+import { apiClient } from "@/api/client";
 
-const userStore = useUserStore();
-const userDetails = computed(() => userStore.userDetails);
+interface UserResponse {
+  email: string;
+  id: string;
+  firstName: string | null;
+  lastName: string | null;
+}
+
+const userDetails = ref<UserResponse | null>(null);
 const loading = ref(false);
 const error = ref<string | null>(null);
 
@@ -34,7 +40,8 @@ const fetchUserDetails = async () => {
   loading.value = true;
   error.value = null;
   try {
-    await userStore.fetchUserDetails();
+    const { data } = await apiClient.get<UserResponse>("/users/me");
+    userDetails.value = data;
   } catch (e) {
     error.value = e instanceof Error ? e.message : "An unknown error occurred";
   } finally {
@@ -42,11 +49,7 @@ const fetchUserDetails = async () => {
   }
 };
 
-onMounted(() => {
-  if (!userDetails.value) {
-    fetchUserDetails();
-  }
-});
+onMounted(fetchUserDetails);
 </script>
 
 <style scoped>

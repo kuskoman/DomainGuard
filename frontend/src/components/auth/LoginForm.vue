@@ -46,9 +46,8 @@ const submit = async () => {
     });
     const { accessToken } = data;
     userStore.setAccessToken(accessToken);
-    await userStore.fetchUserDetails();
     alertsStore.addAlert(AlertType.Success, "User logged in successfully!");
-    router.push({
+    await router.push({
       name: "/user/profile",
     });
   } catch (error: unknown) {

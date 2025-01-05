@@ -16,6 +16,7 @@ declare module 'vue' {
     FormattedDate: typeof import('./components/generic/FormattedDate.vue')['default']
     LoginForm: typeof import('./components/auth/LoginForm.vue')['default']
     NavigationDrawer: typeof import('./components/generic/navigation/NavigationDrawer.vue')['default']
+    NotificationList: typeof import('./components/generic/navigation/NotificationList.vue')['default']
     ProfileInfo: typeof import('./components/profile/ProfileInfo.vue')['default']
     RegisterForm: typeof import('./components/auth/RegisterForm.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']

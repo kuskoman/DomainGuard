@@ -50,7 +50,6 @@ const submit = async () => {
     const { accessToken, user } = data;
     alertsStore.addAlert(AlertType.Success, "User registered successfully!");
     userStore.setAccessToken(accessToken);
-    await userStore.fetchUserDetails();
     router.push({
       name: "/user/profile",
     });

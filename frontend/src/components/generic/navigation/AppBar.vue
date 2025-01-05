@@ -5,6 +5,17 @@
       <v-app-bar-title class="text-white">DomainGuard</v-app-bar-title>
     </router-link>
     <v-spacer></v-spacer>
+
+    <v-menu>
+      <template v-slot:activator="{ props }">
+        <v-btn icon v-bind="props">
+          <v-icon>mdi-bell</v-icon>
+          <v-badge v-if="unreadCount > 0" :content="unreadCount" color="error" overlap />
+        </v-btn>
+      </template>
+      <NotificationList />
+    </v-menu>
+
     <template v-if="isLoggedIn">
       <v-btn to="/user/profile">Profile</v-btn>
       <v-btn @click="logout">Logout</v-btn>
@@ -19,14 +30,20 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useUserStore } from "@/stores/user";
+import { useNotificationStore } from "@/stores/notifications";
+import router from "@/router";
 
 defineProps<{ toggleDrawer: (enabled: boolean) => void }>();
+
 const userStore = useUserStore();
+const notificationStore = useNotificationStore();
 
 const isLoggedIn = computed(() => !!userStore.accessToken);
+const unreadCount = computed(() => notificationStore.unreadCount);
 
-const logout = () => {
+const logout = async () => {
   userStore.logout();
+  await router.push({ name: "/" });
 };
 </script>
 
