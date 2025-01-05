@@ -61,8 +61,8 @@ const fetchDomains = async () => {
   }
 };
 
-const navigateToDomain = (domainId: string) => {
-  router.push(`/domains/${domainId}`);
+const navigateToDomain = async (domainId: string) => {
+  await router.push(`/domains/${domainId}`);
 };
 
 const deleteDomain = async (domainId: string) => {
