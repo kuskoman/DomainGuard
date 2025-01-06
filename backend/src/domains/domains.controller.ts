@@ -5,6 +5,7 @@ import { LoggedGuard } from '@src/auth/guards/logged.guard';
 import { UserId } from '@src/auth/decorators/userId.decorator';
 import { ApiCreatedResponse, ApiHeader, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { GetDomainDto } from './dto/getDomainDto';
+import { SslCertificateDto } from './ssl-certificates/dto/ssl-certificate.dto';
 
 @ApiTags('domains')
 @UseGuards(LoggedGuard)
@@ -33,12 +34,17 @@ export class DomainsController {
   @ApiOkResponse({ type: GetDomainDto })
   async findOne(@UserId() userId: string, @Param() { id }: { id: string }) {
     this.logger.log(`Getting domain ${id} for user ${userId}`);
-    const domain = await this.domainsService.findOneWithUser(id, userId);
+    const { sslCertificates, ...domain } = await this.domainsService.findOneWithUser(id, userId);
     if (!domain || domain.userId !== userId) {
       throw new NotFoundException(`Domain ${id} not found`);
     }
 
-    return domain;
+    const domainWithCertificates = {
+      ...domain,
+      sslCertificates: sslCertificates.map((cert) => new SslCertificateDto(cert)),
+    };
+
+    return domainWithCertificates;
   }
 
   @Post(':id/refresh')

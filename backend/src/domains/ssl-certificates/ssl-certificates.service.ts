@@ -15,7 +15,7 @@ export class SslCertificatesService {
 
   public async updateCertificatesForDomain(domainId: string): Promise<string[]> {
     const domain = await this.sslCertificatesRepository.findDomainById(domainId);
-    this.logger.log(`Updating SSL certificates for domain: ${domain}`);
+    this.logger.log(`Updating SSL certificates for domain: ${domain.name} (ID: ${domain.id})`);
 
     const hostnames = await this.crtshService.getHostnames(domain.name);
     const newHostnames = await this.sslCertificatesRepository.findNewHostnames(hostnames);

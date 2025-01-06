@@ -66,6 +66,20 @@ export class DomainsRepository {
     });
   }
 
+  public async findOneWithUserWithCertificates(input: FindDomainInput) {
+    const { id, userId } = input;
+
+    return await this.db.domain.findFirst({
+      where: {
+        id,
+        user: { id: userId },
+      },
+      include: {
+        sslCertificates: true,
+      },
+    });
+  }
+
   public async removeWithUser(input: RemoveDomainInput) {
     const { id, userId } = input;
 

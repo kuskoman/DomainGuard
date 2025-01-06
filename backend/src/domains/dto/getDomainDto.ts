@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Domain } from '@prisma/client';
+import { SslCertificateDto } from '../ssl-certificates/dto/ssl-certificate.dto';
 
 export class GetDomainDto implements Domain {
   @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440000' })
@@ -25,4 +26,7 @@ export class GetDomainDto implements Domain {
 
   @ApiProperty({ type: () => Date })
   updatedAt!: Date;
+
+  @ApiProperty({ type: () => [SslCertificateDto] })
+  sslCertificates: SslCertificateDto[] = [];
 }

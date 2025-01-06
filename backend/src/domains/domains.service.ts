@@ -28,7 +28,7 @@ export class DomainsService {
     );
 
     this.sslCertificateService
-      .updateCertificatesForDomain(domain.name)
+      .updateCertificatesForDomain(domain.id)
       .catch((error) => this.logger.error(`Error updating SSL certificates: ${JSON.stringify(error)}`));
 
     return domain;
@@ -83,7 +83,7 @@ export class DomainsService {
     const updatedDomain = await this.repository.updateExpirationMetadata({ id, ...expirationMetadata });
 
     this.sslCertificateService
-      .updateCertificatesForDomain(domain.name)
+      .updateCertificatesForDomain(domain.id)
       .catch((error) => this.logger.error(`Error updating SSL certificates: ${JSON.stringify(error)}`));
 
     return updatedDomain;
@@ -107,7 +107,7 @@ export class DomainsService {
       throw new UnprocessableEntityException('Id and userId are required');
     }
 
-    const domain = await this.repository.findOneWithUser({ id, userId });
+    const domain = await this.repository.findOneWithUserWithCertificates({ id, userId });
     if (!domain) {
       throw new NotFoundException(`Domain with ID ${id} not found for user ${userId}`);
     }

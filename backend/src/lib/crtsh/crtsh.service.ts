@@ -67,7 +67,6 @@ export class CrtshService {
       .filter((name) => isValidHostname(name))
       .reduce<string[]>((uniqueNames, name) => (uniqueNames.includes(name) ? uniqueNames : [...uniqueNames, name]), []);
 
-    console.log(JSON.stringify(parsedResults));
     return parsedResults;
   }
 }

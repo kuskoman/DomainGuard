@@ -25,7 +25,7 @@ export class SslCertificatesRepository {
   }
 
   public async findNewHostnames(allHostnames: string[]) {
-    const result = await this.dbService.sslCertificate.findMany({
+    const existingCertificates = await this.dbService.sslCertificate.findMany({
       where: {
         hostname: {
           notIn: allHostnames,
@@ -36,8 +36,12 @@ export class SslCertificatesRepository {
       },
     });
 
-    this.logger.debug(`Found ${result.length} new hostnames`);
-    return result.map((item) => item.hostname);
+    this.logger.debug(`Found ${existingCertificates.length} existing certificates`);
+    const existingHostnames = existingCertificates.map((certificate) => certificate.hostname);
+    const newHostnames = allHostnames.filter((hostname) => !existingHostnames.includes(hostname));
+
+    this.logger.debug(`Determined ${newHostnames.length} to be new`);
+    return newHostnames;
   }
 
   public async findDomainById(domainId: string) {
