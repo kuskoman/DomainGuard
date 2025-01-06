@@ -11,6 +11,9 @@
         <v-list-item to="/user/profile" link>
           <v-list-item-title>Profile</v-list-item-title>
         </v-list-item>
+        <v-list-item to="/notifications" link>
+          <v-list-item-title>Notifications</v-list-item-title>
+        </v-list-item>
         <v-list-item @click="logout" link>
           <v-list-item-title>Logout</v-list-item-title>
         </v-list-item>
