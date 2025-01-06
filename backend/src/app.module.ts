@@ -10,6 +10,7 @@ import { EncryptionModule } from './encryption/encryption.module';
 import { SessionsModule } from './sessions/sessions.module';
 import { RedisModule } from './lib/redis/redis.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { CrtshModule } from './lib/crtsh/crtsh.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { NotificationsModule } from './notifications/notifications.module';
     RedisModule,
     SessionsModule,
     NotificationsModule,
+    CrtshModule,
   ],
 })
 export class AppModule {}

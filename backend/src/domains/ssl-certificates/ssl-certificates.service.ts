@@ -1,10 +1,26 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import { CrtshService } from '@src/lib/crtsh/crtsh.service';
 import * as https from 'https';
 import * as tls from 'tls';
 
 @Injectable()
 export class SslCertificatesService {
+  private readonly logger = new Logger(SslCertificatesService.name);
+
+  constructor(private readonly crtshService: CrtshService) {}
+
+  public async updateCertificatesForDomain(domain: string) {
+    this.logger.log(`Updating SSL certificates for domain: ${domain}`);
+
+    const hostnames = await this.fillAllSslCertificatesForDomain(domain);
+
+    this.logger.log(`Found ${hostnames.length} certificates for domain: ${domain}`);
+    return hostnames;
+  }
+
   public async checkSslExpiration(domain: string): Promise<Date | null> {
+    this.logger.log(`Checking SSL expiration for domain: ${domain}`);
+
     return new Promise((resolve, reject) => {
       const req = https.request({
         host: domain,
@@ -33,5 +49,10 @@ export class SslCertificatesService {
 
       req.end();
     });
+  }
+
+  private async fillAllSslCertificatesForDomain(rootDomain: string) {
+    const hostnames = await this.crtshService.getHostnames(rootDomain);
+    return hostnames;
   }
 }

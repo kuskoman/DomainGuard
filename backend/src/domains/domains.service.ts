@@ -4,6 +4,7 @@ import { DomainsExpirationService } from './domains-expiration/domains-expiratio
 import { CreateDomainInput, FindDomainsByUserInput } from './domains.interfaces';
 import { NotificationsService } from '@src/notifications/notifications.service';
 import { NotificationTopic } from '@prisma/client';
+import { SslCertificatesService } from './ssl-certificates/ssl-certificates.service';
 
 @Injectable()
 export class DomainsService {
@@ -13,6 +14,7 @@ export class DomainsService {
     private readonly repository: DomainsRepository,
     private readonly expirationService: DomainsExpirationService,
     private readonly notificationsService: NotificationsService,
+    private readonly sslCertificateService: SslCertificatesService,
   ) {}
 
   public async create(name: string, userId: string) {
@@ -21,9 +23,13 @@ export class DomainsService {
 
     this.logger.log(`Domain created: ${domain.name} (ID: ${domain.id}) for user ${userId}`);
 
-    this.updateDomainExpirationDate(domain.id).catch((error) =>
+    this.updateDomainExpirationDates(domain.id).catch((error) =>
       this.logger.error(`Error updating domain expiration date: ${JSON.stringify(error)}`),
     );
+
+    this.sslCertificateService
+      .updateCertificatesForDomain(domain.name)
+      .catch((error) => this.logger.error(`Error updating SSL certificates: ${JSON.stringify(error)}`));
 
     return domain;
   }
@@ -45,7 +51,7 @@ export class DomainsService {
 
   public async updateDomainExpirationDateWithUser(id: string, userId: string) {
     await this.findDomainWithUserValidation(id, userId);
-    return this.updateDomainExpirationDate(id);
+    return this.updateDomainExpirationDates(id);
   }
 
   public async findAll() {
@@ -62,7 +68,7 @@ export class DomainsService {
     return this.repository.remove({ id });
   }
 
-  public async updateDomainExpirationDate(id: string) {
+  public async updateDomainExpirationDates(id: string) {
     const domain = await this.findDomainWithValidation(id);
     const expirationMetadata = await this.expirationService.getExpirationMetadata(domain.name);
 
@@ -75,6 +81,10 @@ export class DomainsService {
     }
 
     const updatedDomain = await this.repository.updateExpirationMetadata({ id, ...expirationMetadata });
+
+    this.sslCertificateService
+      .updateCertificatesForDomain(domain.name)
+      .catch((error) => this.logger.error(`Error updating SSL certificates: ${JSON.stringify(error)}`));
 
     return updatedDomain;
   }

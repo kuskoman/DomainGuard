@@ -59,7 +59,7 @@ describe(DomainsController.name, () => {
 
   describe('refreshDomainExpiration method', () => {
     it('should update the expiration date of a domain for a user', async () => {
-      const result = await controller.refreshDomainExpiration({ userId: testDomain.userId } as any, {
+      const result = await controller.refreshDomainExpirations({ userId: testDomain.userId } as any, {
         id: testDomain.id,
       });
       expect(result).toEqual(testExpirationDateDomain);
@@ -70,7 +70,7 @@ describe(DomainsController.name, () => {
         throw new NotFoundException();
       });
 
-      await expect(controller.refreshDomainExpiration(testDomain.userId, { id: 'wrong-id' })).rejects.toThrow(
+      await expect(controller.refreshDomainExpirations(testDomain.userId, { id: 'wrong-id' })).rejects.toThrow(
         NotFoundException,
       );
     });

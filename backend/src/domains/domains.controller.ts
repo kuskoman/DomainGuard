@@ -42,7 +42,7 @@ export class DomainsController {
   }
 
   @Post(':id/refresh')
-  async refreshDomainExpiration(@UserId() userId: string, @Param() { id }: { id: string }) {
+  async refreshDomainExpirations(@UserId() userId: string, @Param() { id }: { id: string }) {
     this.logger.log(`Refreshing domain ${id} for user ${userId}`);
 
     return this.domainsService.updateDomainExpirationDateWithUser(id, userId);
