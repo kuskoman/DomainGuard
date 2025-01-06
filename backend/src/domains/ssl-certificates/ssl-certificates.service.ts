@@ -25,7 +25,7 @@ export class SslCertificatesService {
       return [];
     }
 
-    this.logger.log(`Found ${hostnames.length} certificates for domain: ${domain}`);
+    this.logger.log(`Found ${hostnames.length} certificates for domain: ${domain.name}`);
     await this.sslCertificatesRepository.createMultipleHostnames(domain, newHostnames);
     return hostnames;
   }
