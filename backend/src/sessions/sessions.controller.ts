@@ -32,7 +32,10 @@ export class SessionsController {
   }
 
   @Delete(':id')
-  async deleteSession(@UserId() userId: string, @Param('sessionId') sessionId: string) {
+  async deleteSession(@UserId() userId: string, @Param('id') sessionId: string) {
+    if (!sessionId) {
+      throw new UnprocessableEntityException('Could not determine session to delete');
+    }
     return await this.sessionsService.deleteSession(userId, sessionId);
   }
 }

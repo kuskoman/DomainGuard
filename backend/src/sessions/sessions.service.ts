@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { BaseConfig, baseConfig } from '@src/config/base.config';
 import { EncryptionService } from '@src/encryption/encryption.service';
 import { RedisService } from '@src/lib/redis/redis.service';
@@ -97,6 +97,11 @@ export class SessionsService {
     }
 
     const sessionKey = this.getSessionKey(userId, sessionId);
+    const session = await this.getSession(sessionKey);
+    if (!session) {
+      this.logger.warn(`Session not found for user ${userId} and id ${sessionId}`);
+      throw new NotFoundException('Session not found');
+    }
     await this.redisService.del(sessionKey);
     this.logger.log(`Session deleted for user ${userId}`);
   }
