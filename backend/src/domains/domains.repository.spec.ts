@@ -98,12 +98,12 @@ describe(DomainsRepository.name, () => {
 
   describe('updateExpirationDate', () => {
     it('should update a domain expiration date', async () => {
-      const input: UpdateExpirationDateInput = { id: testDomain.id, expirationDate: new Date() };
+      const input: UpdateExpirationDateInput = { id: testDomain.id, expirationDate: new Date(), renewalDate: null };
 
       const mockedDate = new Date();
       const mockedResult = { ...testDomain, lastCheckedAt: mockedDate, expirationDate: input.expirationDate };
       mockDbService.domain.update.mockResolvedValueOnce(mockedResult);
-      const result = await repository.updateExpirationDate(input);
+      const result = await repository.updateExpirationMetadata(input);
       expect(result.expirationDate).toEqual(input.expirationDate);
       expect(result.lastCheckedAt).toBeInstanceOf(Date);
     });

@@ -64,9 +64,9 @@ export class DomainsService {
 
   public async updateDomainExpirationDate(id: string) {
     const domain = await this.findDomainWithValidation(id);
-    const expirationDate = await this.expirationService.getExpirationDate(domain.name);
+    const expirationMetadata = await this.expirationService.getExpirationMetadata(domain.name);
 
-    if (!expirationDate) {
+    if (!expirationMetadata) {
       await this.notificationsService.createNotification(domain.userId, {
         message: `Error updating expiration date for domain ${domain.name}`,
         topic: NotificationTopic.DOMAIN_EXPIRATION,
@@ -74,12 +74,7 @@ export class DomainsService {
       throw new UnprocessableEntityException('Could not get expiration date');
     }
 
-    const updatedDomain = await this.repository.updateExpirationDate({ id, expirationDate });
-
-    await this.notificationsService.createNotification(domain.userId, {
-      message: `Domain ${domain.name} expiration date updated successfully.`,
-      topic: NotificationTopic.DOMAIN_EXPIRATION,
-    });
+    const updatedDomain = await this.repository.updateExpirationMetadata({ id, ...expirationMetadata });
 
     return updatedDomain;
   }

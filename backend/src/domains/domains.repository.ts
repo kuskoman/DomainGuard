@@ -103,7 +103,7 @@ export class DomainsRepository {
     });
   }
 
-  public async updateExpirationDate(input: UpdateExpirationDateInput) {
+  public async updateExpirationMetadata(input: UpdateExpirationDateInput) {
     const { id, expirationDate } = input;
 
     return await this.db.domain.update({

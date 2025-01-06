@@ -15,6 +15,9 @@ export class GetDomainDto implements Domain {
   expirationDate: Date | null = null;
 
   @ApiProperty({ type: () => Date, required: false })
+  renewalDate: Date | null = null;
+
+  @ApiProperty({ type: () => Date, required: false })
   lastCheckedAt: Date | null = null;
 
   @ApiProperty({ type: () => Date })

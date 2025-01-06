@@ -19,5 +19,6 @@ export interface RemoveDomainInput {
 
 export interface UpdateExpirationDateInput {
   id: string;
-  expirationDate: Date;
+  expirationDate: Date | null;
+  renewalDate: Date | null;
 }
