@@ -3,16 +3,24 @@
     <v-card-title>
       Notifications
       <v-spacer />
-      <v-btn color="primary" @click="markAllAsRead" :disabled="unreadCount === 0"> Mark All as Read </v-btn>
+      <v-btn color="primary" @click="markAllAsRead" :disabled="unreadCount === 0" class="mx-2">
+        Mark All as Read
+      </v-btn>
+      <v-btn color="secondary" @click="goToNotificationList"> View All </v-btn>
     </v-card-title>
 
     <v-divider />
 
     <v-list>
-      <v-list-item v-for="notification in notifications" :key="notification.id" class="notification-item">
+      <v-list-item
+        v-for="notification in unreadNotifications"
+        :key="notification.id"
+        class="notification-item"
+        @click="markAsRead(notification.id)"
+      >
         <v-list-item-avatar>
-          <v-icon :color="getIconColor(notification.topic)">
-            {{ getIcon(notification.topic) }}
+          <v-icon :color="notificationTypeMap[notification.topic]?.color || 'info'">
+            {{ notificationTypeMap[notification.topic]?.icon || "mdi-bell-outline" }}
           </v-icon>
         </v-list-item-avatar>
 
@@ -22,17 +30,11 @@
             <FormattedDate :date="notification.createdAt" />
           </v-list-item-subtitle>
         </v-list-item-content>
-
-        <v-list-item-action>
-          <v-btn icon color="error" @click="markAsRead(notification.id)" v-if="notification.status === 'UNREAD'">
-            <v-icon>mdi-check-circle-outline</v-icon>
-          </v-btn>
-        </v-list-item-action>
       </v-list-item>
     </v-list>
 
-    <v-card-text v-if="notifications.length === 0" class="text-center">
-      <v-alert type="info">No notifications available.</v-alert>
+    <v-card-text v-if="unreadNotifications.length === 0" class="text-center">
+      <v-alert type="info" dismissible> No notifications available. </v-alert>
     </v-card-text>
   </v-card>
 </template>
@@ -40,50 +42,53 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useNotificationsStore } from "@/stores/notifications";
+import { useRouter } from "vue-router";
 
 const notificationStore = useNotificationsStore();
 notificationStore.connectWebSocket();
 
-const notifications = computed(() => notificationStore.notifications);
+const router = useRouter();
+
+const unreadNotifications = computed(() => notificationStore.unreadNotifications);
 const unreadCount = computed(() => notificationStore.unreadCount);
 
-const markAsRead = (id: number) => {
-  notificationStore.markAsRead(id);
+const markAsRead = async (id: number) => {
+  await notificationStore.markAsRead(id);
 };
 
-const markAllAsRead = () => {
-  notificationStore.markAllAsRead();
+const markAllAsRead = async () => {
+  await notificationStore.markAllAsRead();
 };
 
-const getIcon = (topic: string) => {
-  switch (topic) {
-    case "DOMAIN_EXPIRATION":
-      return "mdi-alert-circle-outline";
-    case "SSL_EXPIRATION":
-      return "mdi-lock-alert-outline";
-    default:
-      return "mdi-bell-outline";
-  }
+const goToNotificationList = () => {
+  router.push("/notifications");
 };
 
-const getIconColor = (topic: string) => {
-  switch (topic) {
-    case "DOMAIN_EXPIRATION":
-      return "warning";
-    case "SSL_EXPIRATION":
-      return "error";
-    default:
-      return "info";
-  }
-};
+const notificationTypeMap = {
+  DOMAIN_EXPIRATION: {
+    icon: "mdi-alert-circle-outline",
+    color: "warning",
+  },
+  SSL_EXPIRATION: {
+    icon: "mdi-lock-alert-outline",
+    color: "error",
+  },
+} as const;
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .notification-item {
   padding: 8px 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: background-color 0.2s;
 }
 
-.notification-item.unread {
-  font-weight: bold;
+.notification-item:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.v-btn {
+  margin-left: 8px;
 }
 </style>
