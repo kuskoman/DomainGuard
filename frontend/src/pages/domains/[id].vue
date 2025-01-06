@@ -1,6 +1,6 @@
 <template>
   <v-container class="py-4">
-    <v-card class="mx-auto" max-width="600" elevation="2">
+    <v-card class="mx-auto" max-width="1200" elevation="2">
       <v-card-text>
         <div class="text-h6 font-weight-bold">Domain Details</div>
         <p class="text-h5 font-weight-black">
@@ -9,29 +9,8 @@
       </v-card-text>
       <v-divider></v-divider>
       <v-card-text v-if="domain">
-        <div class="mb-4">
-          <strong>Expiration Date: </strong>
-          <FormattedDate :date="domain.expirationDate" v-if="domain.expirationDate" />
-          <span v-else>N/A</span>
-        </div>
-        <div class="mb-4">
-          <strong>Last Checked: </strong>
-          <FormattedDate :date="domain.lastCheckedAt" v-if="domain.lastCheckedAt" />
-          <span v-else>N/A</span>
-        </div>
-        <div class="mb-4">
-          <strong>Renewal date: </strong>
-          <FormattedDate :date="domain.renewalDate" v-if="domain.renewalDate" />
-          <span v-else>N/A</span>
-        </div>
-        <div class="mb-4">
-          <strong>Guard created At: </strong>
-          <FormattedDate :date="domain.createdAt" />
-        </div>
-        <div class="mb-4">
-          <strong>Guard updated At: </strong>
-          <FormattedDate :date="domain.updatedAt" />
-        </div>
+        <DomainInfo :domain="domain" />
+        <DomainCertificates :certificates="domain.sslCertificates" />
       </v-card-text>
       <v-card-text v-else class="d-flex flex-column align-center py-4">
         <v-progress-circular indeterminate color="primary" size="32" />
@@ -50,7 +29,8 @@ import { ref, onMounted, watch } from "vue";
 import { useRoute } from "vue-router";
 import { apiClient } from "@/api/client";
 import { AlertType, useAlertStore } from "@/stores/alerts";
-import FormattedDate from "@/components/generic/FormattedDate.vue";
+import DomainInfo from "@/components/domains/DomainInfo.vue";
+import DomainCertificates from "@/components/domains/DomainCertificates.vue";
 import type { Domain } from "@/api/interfaces/domains.responses";
 
 interface RouteParams {
@@ -103,9 +83,5 @@ onMounted(fetchDomain);
 
 .text-h6 {
   margin-bottom: 8px;
-}
-
-.mb-4 {
-  margin-bottom: 16px;
 }
 </style>

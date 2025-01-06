@@ -7,4 +7,14 @@ export interface Domain {
   lastCheckedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
+  sslCertificates: SslCertificate[];
+}
+
+export interface SslCertificate {
+  id: string;
+  hostname: string;
+  expirationDate: Date | null;
+  lastCheckedAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
 }
