@@ -11,12 +11,23 @@ export interface Notification {
   message: string;
   topic: NotificationTopic;
   status: NotificationStatus;
-  createdAt: Date; // Parsed Date object for easier handling
+  createdAt: Date;
 }
 
 export interface NotificationIncomingData extends Omit<Notification, "createdAt"> {
-  createdAt: string; // Raw string for parsing
+  createdAt: string;
 }
+
+const serializeNotification = (notification: NotificationIncomingData) => {
+  return {
+    ...notification,
+    createdAt: new Date(notification.createdAt),
+  };
+};
+
+const sortNotifications = (a: Notification, b: Notification) => {
+  return b.createdAt.getTime() - a.createdAt.getTime();
+};
 
 export const useNotificationsStore = defineStore("notifications", {
   state: () => ({
@@ -39,22 +50,12 @@ export const useNotificationsStore = defineStore("notifications", {
     async fetchUnreadNotifications() {
       const { data } = await apiClient.get<NotificationIncomingData[]>("/notifications/unread");
 
-      this.notifications = data.map((notification) => {
-        return {
-          ...notification,
-          createdAt: new Date(notification.createdAt),
-        };
-      });
+      this.notifications = [...this.notifications, ...data.map(serializeNotification)].sort(sortNotifications);
     },
     async fetchAllNotifications() {
       const { data } = await apiClient.get<NotificationIncomingData[]>("/notifications");
 
-      this.notifications = data.map((notification) => {
-        return {
-          ...notification,
-          createdAt: new Date(notification.createdAt),
-        };
-      });
+      this.notifications = data.map(serializeNotification).sort(sortNotifications);
     },
     connectWebSocket() {
       if (this.websocketConnected) {
@@ -91,12 +92,9 @@ export const useNotificationsStore = defineStore("notifications", {
         return;
       }
 
-      const parsedNotification: Notification = {
-        ...data,
-        createdAt: new Date(data.createdAt),
-      };
+      const parsedNotification = serializeNotification(data);
 
-      this.notifications.unshift(parsedNotification);
+      this.notifications = [...this.notifications, parsedNotification].sort(sortNotifications);
     },
     async markAsRead(notificationId: number) {
       await apiClient.patch(`/notifications/${notificationId}/read`);
