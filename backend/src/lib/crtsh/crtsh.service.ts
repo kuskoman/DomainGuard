@@ -33,10 +33,12 @@ export class CrtshService {
       const response = await lastValueFrom(this.httpService.get<CRTSHResultItem[]>('https://crt.sh/', axiosConfig));
 
       if (!response?.data) {
+        this.logger.error('Empty response from CRT.SH');
         throw new Error('CRTSH: Empty response from CRT.SH');
       }
 
       if (!Array.isArray(response.data)) {
+        this.logger.error('Response is not an array');
         throw new Error('CRTSH: Response is not an array');
       }
 

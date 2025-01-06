@@ -2,19 +2,31 @@ import { Injectable, Logger } from '@nestjs/common';
 import { CrtshService } from '@src/lib/crtsh/crtsh.service';
 import * as https from 'https';
 import * as tls from 'tls';
+import { SslCertificatesRepository } from './ssl-certificates.repository';
 
 @Injectable()
 export class SslCertificatesService {
   private readonly logger = new Logger(SslCertificatesService.name);
 
-  constructor(private readonly crtshService: CrtshService) {}
+  constructor(
+    private readonly crtshService: CrtshService,
+    private readonly sslCertificatesRepository: SslCertificatesRepository,
+  ) {}
 
-  public async updateCertificatesForDomain(domain: string) {
+  public async updateCertificatesForDomain(domainId: string): Promise<string[]> {
+    const domain = await this.sslCertificatesRepository.findDomainById(domainId);
     this.logger.log(`Updating SSL certificates for domain: ${domain}`);
 
-    const hostnames = await this.fillAllSslCertificatesForDomain(domain);
+    const hostnames = await this.crtshService.getHostnames(domain.name);
+    const newHostnames = await this.sslCertificatesRepository.findNewHostnames(hostnames);
+
+    if (newHostnames.length === 0) {
+      this.logger.log(`No new hostnames found for domain: ${domain.name}`);
+      return [];
+    }
 
     this.logger.log(`Found ${hostnames.length} certificates for domain: ${domain}`);
+    await this.sslCertificatesRepository.createMultipleHostnames(domain, newHostnames);
     return hostnames;
   }
 
@@ -49,10 +61,5 @@ export class SslCertificatesService {
 
       req.end();
     });
-  }
-
-  private async fillAllSslCertificatesForDomain(rootDomain: string) {
-    const hostnames = await this.crtshService.getHostnames(rootDomain);
-    return hostnames;
   }
 }
