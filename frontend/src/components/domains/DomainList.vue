@@ -17,7 +17,7 @@
 import { ref, onMounted } from "vue";
 import { apiClient } from "@/api/client";
 import { AlertType, useAlertStore } from "@/stores/alerts";
-import type { Domain } from "./domains.interfaces";
+import type { Domain } from "@/api/interfaces/domains.responses";
 
 const domains = ref<Domain[]>([]);
 const loading = ref(false);

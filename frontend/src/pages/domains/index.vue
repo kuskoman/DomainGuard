@@ -36,7 +36,7 @@ import { ref, onMounted } from "vue";
 import { apiClient } from "@/api/client";
 import { AlertType, useAlertStore } from "@/stores/alerts";
 import router from "@/router";
-import type { Domain } from "@/components/domains/domains.interfaces";
+import type { Domain } from "@/api/interfaces/domains.responses";
 
 const domains = ref<Domain[]>([]);
 const loading = ref(false);
@@ -49,11 +49,28 @@ const headers = [
   { text: "Actions", value: "actions", align: "end", sortable: false },
 ] as const;
 
+const sortDomains = (a: Domain, b: Domain) => {
+  if (a.renewalDate === null && b.renewalDate === null) {
+    return 0;
+  }
+
+  if (a.renewalDate === null) {
+    return 1;
+  }
+
+  if (b.renewalDate === null) {
+    return -1;
+  }
+
+  return a.renewalDate.getTime() - b.renewalDate.getTime();
+};
+
 const fetchDomains = async () => {
   loading.value = true;
   try {
     const { data } = await apiClient.get<Domain[]>("/domains");
-    domains.value = data;
+    const sortedDomains = data.sort(sortDomains);
+    domains.value = sortedDomains;
   } catch (error) {
     alertsStore.addAlert(AlertType.Error, "Failed to fetch domains.");
   } finally {

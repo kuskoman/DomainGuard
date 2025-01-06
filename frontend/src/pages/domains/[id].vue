@@ -20,6 +20,11 @@
           <span v-else>N/A</span>
         </div>
         <div class="mb-4">
+          <strong>Renewal date: </strong>
+          <FormattedDate :date="domain.renewalDate" v-if="domain.renewalDate" />
+          <span v-else>N/A</span>
+        </div>
+        <div class="mb-4">
           <strong>Guard created At: </strong>
           <FormattedDate :date="domain.createdAt" />
         </div>
@@ -45,8 +50,8 @@ import { ref, onMounted, watch } from "vue";
 import { useRoute } from "vue-router";
 import { apiClient } from "@/api/client";
 import { AlertType, useAlertStore } from "@/stores/alerts";
-import type { Domain } from "@/components/domains/domains.interfaces";
 import FormattedDate from "@/components/generic/FormattedDate.vue";
+import type { Domain } from "@/api/interfaces/domains.responses";
 
 interface RouteParams {
   id: string;
