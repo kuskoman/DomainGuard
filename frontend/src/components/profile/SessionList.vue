@@ -68,12 +68,10 @@ const destroySession = async (sessionId: string) => {
   }
 };
 
-const formatDate = (date: string) => new Date(date).toLocaleString();
-
 onMounted(fetchSessions);
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .v-list-item {
   align-items: center;
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
