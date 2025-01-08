@@ -34,11 +34,13 @@ export class DomainsController {
   @ApiOkResponse({ type: GetDomainDto })
   async findOne(@UserId() userId: string, @Param() { id }: { id: string }) {
     this.logger.log(`Getting domain ${id} for user ${userId}`);
-    const { sslCertificates, ...domain } = await this.domainsService.findOneWithUser(id, userId);
+
+    const domain = await this.domainsService.findOneWithUser(id, userId);
     if (!domain || domain.userId !== userId) {
       throw new NotFoundException(`Domain ${id} not found`);
     }
 
+    const sslCertificates = domain.sslCertificates || [];
     const domainWithCertificates = {
       ...domain,
       sslCertificates: sslCertificates.map((cert) => new SslCertificateDto(cert)),

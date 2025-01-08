@@ -1,12 +1,24 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { SslCertificatesService } from './ssl-certificates.service';
+import { SslCertificatesRepository } from './ssl-certificates.repository';
+import { CrtshService } from '@src/lib/crtsh/crtsh.service';
 
 describe(SslCertificatesService.name, () => {
   let service: SslCertificatesService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [SslCertificatesService],
+      providers: [
+        SslCertificatesService,
+        {
+          provide: SslCertificatesRepository,
+          useValue: {},
+        },
+        {
+          provide: CrtshService,
+          useValue: {},
+        },
+      ],
     }).compile();
 
     service = module.get<SslCertificatesService>(SslCertificatesService);

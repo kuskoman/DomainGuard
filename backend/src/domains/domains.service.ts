@@ -3,7 +3,7 @@ import { DomainsRepository } from './domains.repository';
 import { DomainsExpirationService } from './domains-expiration/domains-expiration.service';
 import { CreateDomainInput, FindDomainsByUserInput } from './domains.interfaces';
 import { NotificationsService } from '@src/notifications/notifications.service';
-import { NotificationTopic } from '@prisma/client';
+import { Domain, NotificationTopic } from '@prisma/client';
 import { SslCertificatesService } from './ssl-certificates/ssl-certificates.service';
 
 @Injectable()
@@ -27,9 +27,9 @@ export class DomainsService {
       this.logger.error(`Error updating domain expiration date: ${JSON.stringify(error)}`),
     );
 
-    this.sslCertificateService
-      .updateCertificatesForDomain(domain.id)
-      .catch((error) => this.logger.error(`Error updating SSL certificates: ${JSON.stringify(error)}`));
+    this.refreshDomainCertificates(domain).catch((error) =>
+      this.logger.error(`Error updating SSL certificates: ${JSON.stringify(error)}`),
+    );
 
     return domain;
   }
@@ -82,11 +82,16 @@ export class DomainsService {
 
     const updatedDomain = await this.repository.updateExpirationMetadata({ id, ...expirationMetadata });
 
-    this.sslCertificateService
-      .updateCertificatesForDomain(domain.id)
-      .catch((error) => this.logger.error(`Error updating SSL certificates: ${JSON.stringify(error)}`));
+    this.refreshDomainCertificates(updatedDomain).catch((error) =>
+      this.logger.error(`Error updating SSL certificates: ${JSON.stringify(error)}`),
+    );
 
     return updatedDomain;
+  }
+
+  private async refreshDomainCertificates(domain: Domain) {
+    await this.sslCertificateService.findAndInsertCertificatesForDomain(domain.id);
+    await this.sslCertificateService.updateCertificateExpirationDatesForDomain(domain);
   }
 
   private async findDomainWithValidation(id: string) {

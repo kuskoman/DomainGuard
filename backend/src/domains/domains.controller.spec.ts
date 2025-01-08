@@ -3,6 +3,7 @@ import { DomainsController } from './domains.controller';
 import { DomainsService } from './domains.service';
 import { LoggedGuard } from '@src/auth/guards/logged.guard';
 import { NotFoundException } from '@nestjs/common';
+import { SslCertificateDto } from './ssl-certificates/dto/ssl-certificate.dto';
 
 describe(DomainsController.name, () => {
   let controller: DomainsController;
@@ -13,7 +14,7 @@ describe(DomainsController.name, () => {
       providers: [
         {
           provide: DomainsService,
-          useValue: mockDomainsService,
+          useValue: domainsServiceMock,
         },
       ],
     })
@@ -40,20 +41,20 @@ describe(DomainsController.name, () => {
 
   describe('findOne method', () => {
     it('should find one domain by id for a user', async () => {
-      mockDomainsService.findOneWithUser.mockResolvedValueOnce(testDomain);
+      domainsServiceMock.findOneWithUser.mockResolvedValueOnce(testDomainWithCertificates);
 
       const result = await controller.findOne(testDomain.userId, { id: testDomain.id });
 
-      expect(mockDomainsService.findOneWithUser).toHaveBeenCalledWith(testDomain.id, testDomain.userId);
-
-      expect(result).toEqual(testDomain);
+      expect(domainsServiceMock.findOneWithUser).toHaveBeenCalledWith(testDomain.id, testDomain.userId);
+      expect(result).toEqual({
+        ...testDomainWithCertificates,
+        sslCertificates: testDomainWithCertificates.sslCertificates.map((cert) => new SslCertificateDto(cert)),
+      });
     });
 
     it('should throw NotFoundException when domain is not found', async () => {
-      mockDomainsService.findOneWithUser.mockResolvedValueOnce(null);
-      await expect(controller.findOne({ userId: testDomain.userId } as any, { id: 'wrong-id' })).rejects.toThrow(
-        NotFoundException,
-      );
+      domainsServiceMock.findOneWithUser.mockResolvedValueOnce(null);
+      await expect(controller.findOne(testDomain.userId, { id: 'wrong-id' })).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -66,7 +67,7 @@ describe(DomainsController.name, () => {
     });
 
     it('should throw NotFoundException when domain is not found', async () => {
-      mockDomainsService.updateDomainExpirationDateWithUser.mockImplementationOnce(async () => {
+      domainsServiceMock.updateDomainExpirationDateWithUser.mockImplementationOnce(async () => {
         throw new NotFoundException();
       });
 
@@ -83,14 +84,29 @@ const testDomain = {
   userId: 'test-user-id',
 };
 
+const testDomainWithCertificates = {
+  ...testDomain,
+  sslCertificates: [
+    {
+      id: 'cert-1',
+      domainId: '1',
+      expirationDate: new Date(),
+      lastCheckedAt: new Date(),
+      hostname: 'example.com',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    },
+  ],
+};
+
 const testExpirationDateDomain = {
   ...testDomain,
   expirationDate: new Date(),
 };
 
-const mockDomainsService = {
+const domainsServiceMock = {
   create: jest.fn().mockResolvedValue(testDomain),
   findAllWithUser: jest.fn().mockResolvedValue([testDomain]),
-  findOneWithUser: jest.fn().mockResolvedValue(testDomain),
+  findOneWithUser: jest.fn().mockResolvedValue(testDomainWithCertificates),
   updateDomainExpirationDateWithUser: jest.fn().mockResolvedValue(testExpirationDateDomain),
 };

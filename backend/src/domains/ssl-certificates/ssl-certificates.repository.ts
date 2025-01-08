@@ -50,6 +50,30 @@ export class SslCertificatesRepository {
     });
   }
 
+  public async findCertificatesByDomainId(domainId: string) {
+    return await this.dbService.sslCertificate.findMany({
+      where: {
+        domain: {
+          id: domainId,
+        },
+      },
+    });
+  }
+
+  public async updateCertificateExpirationDate(certificateId: string, expirationDate: Date | null) {
+    this.logger.debug(`Updating expiration date for certificate: ${certificateId}`);
+
+    const now = new Date();
+
+    return await this.dbService.sslCertificate.update({
+      where: { id: certificateId },
+      data: {
+        expirationDate,
+        lastCheckedAt: now,
+      },
+    });
+  }
+
   public async createMultipleHostnames(domain: Domain, hostnames: string[]) {
     this.logger.debug(`Creating ${hostnames.length} hostnames for domain: ${domain.name}`);
 
