@@ -30,6 +30,7 @@ model Domain {
   renewalDate     DateTime?        @map("renewal_date")
   sslCertificates SslCertificate[]
   lastCheckedAt   DateTime?        @map("last_checked_at")
+  lastNotifiedAt  DateTime?        @map("last_notified_at")
   createdAt       DateTime         @default(now()) @map("created_at")
   updatedAt       DateTime         @updatedAt @map("updated_at")
 
@@ -43,6 +44,7 @@ model SslCertificate {
   hostname       String
   expirationDate DateTime? @map("expiration_date")
   lastCheckedAt  DateTime? @map("last_checked_at")
+  lastNotifiedAt DateTime? @map("last_notified_at")
   createdAt      DateTime  @default(now()) @map("created_at")
   updatedAt      DateTime  @updatedAt @map("updated_at")
 

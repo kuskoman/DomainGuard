@@ -6,9 +6,14 @@ import { NotificationsService } from '@src/notifications/notifications.service';
 import { Domain, NotificationTopic } from '@prisma/client';
 import { SslCertificatesService } from './ssl-certificates/ssl-certificates.service';
 
+const SEVEN_DAYS = 60 * 60 * 24 * 7 * 1000;
+const THIRTY_DAYS = 60 * 60 * 24 * 30 * 1000;
+
 @Injectable()
 export class DomainsService {
   private readonly logger = new Logger(DomainsService.name);
+  private readonly NOTIFICATION_THRESHOLD = SEVEN_DAYS;
+  private readonly EXPIRATION_THRESHOLD = THIRTY_DAYS;
 
   constructor(
     private readonly domainsRepository: DomainsRepository,
@@ -81,6 +86,21 @@ export class DomainsService {
     }
 
     const updatedDomain = await this.domainsRepository.updateExpirationMetadata({ id, ...expirationMetadata });
+    const isExpiringSoon =
+      updatedDomain.expirationDate &&
+      updatedDomain.expirationDate < new Date(Date.now() + this.EXPIRATION_THRESHOLD) &&
+      updatedDomain.expirationDate > new Date();
+    const wasNotRecentlyNotified =
+      updatedDomain.lastNotifiedAt === null ||
+      updatedDomain.lastNotifiedAt < new Date(Date.now() - this.NOTIFICATION_THRESHOLD);
+
+    if (isExpiringSoon && wasNotRecentlyNotified) {
+      this.logger.log(`Creating notification for domain: ${updatedDomain.name}`);
+      await this.notificationsService.createNotification(updatedDomain.userId, {
+        message: `Domain ${updatedDomain.name} is expiring on ${updatedDomain.expirationDate}`,
+        topic: NotificationTopic.DOMAIN_EXPIRATION,
+      });
+    }
 
     this.refreshDomainCertificates(updatedDomain).catch((error) =>
       this.logger.error(`Error updating SSL certificates: ${JSON.stringify(error)}`),

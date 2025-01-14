@@ -26,7 +26,5 @@ export class SslCertificatesCronService {
     }
 
     this.logger.log('Finished updating SSL certificates');
-
-    return allDomains.length;
   }
 }

@@ -2,6 +2,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Domain } from '@prisma/client';
 import { DbService } from '@src/lib/db/db.service';
 
+const SEVEN_DAYS = 60 * 60 * 24 * 7;
+
 @Injectable()
 export class SslCertificatesRepository {
   private readonly logger = new Logger(SslCertificatesRepository.name);
@@ -10,6 +12,47 @@ export class SslCertificatesRepository {
 
   public async findAllDomains() {
     return await this.dbService.domain.findMany();
+  }
+
+  /** Finds certificates that are expiring within the given treshold.
+   *  @param treshold The number of seconds before expiration to consider a certificate as expiring.
+   */
+  public async findExpiringCertificates(threshold = SEVEN_DAYS, lastNotifiedAt: Date | null = null) {
+    const now = new Date();
+    const thresholdUnixTimestamp = threshold * 1000;
+    const expirationDate = new Date(now.getTime() + thresholdUnixTimestamp);
+
+    const lastNotifiedAtDate = lastNotifiedAt ? { lte: lastNotifiedAt } : null;
+
+    const certificates = await this.dbService.sslCertificate.findMany({
+      where: {
+        expirationDate: {
+          lte: expirationDate,
+        },
+        lastNotifiedAt: lastNotifiedAtDate,
+      },
+      include: {
+        domain: {
+          select: {
+            userId: true,
+          },
+        },
+      },
+    });
+
+    this.logger.debug(`Found ${certificates.length} expiring certificates`);
+    return certificates;
+  }
+
+  public async updateLastNotifiedAt(certificateId: string, lastNotifiedAt: Date = new Date()) {
+    this.logger.debug(`Updating last notified at for certificate: ${certificateId}`);
+
+    return await this.dbService.sslCertificate.update({
+      where: { id: certificateId },
+      data: {
+        lastNotifiedAt,
+      },
+    });
   }
 
   public async getExistingHostnames(allHostnames: string[]) {

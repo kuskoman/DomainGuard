@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Domain } from '@prisma/client';
 import { SslCertificateDto } from '../ssl-certificates/dto/ssl-certificate.dto';
 
-export class GetDomainDto implements Domain {
+export class GetDomainDto implements Omit<Domain, 'lastNotifiedAt'> {
   @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440000' })
   id!: string;
 

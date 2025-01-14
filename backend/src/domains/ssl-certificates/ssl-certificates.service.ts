@@ -3,15 +3,21 @@ import { CrtshService } from '@src/lib/crtsh/crtsh.service';
 import * as https from 'https';
 import * as tls from 'tls';
 import { SslCertificatesRepository } from './ssl-certificates.repository';
-import { Domain } from '@prisma/client';
+import { Domain, NotificationTopic } from '@prisma/client';
+import { NotificationsService } from '@src/notifications/notifications.service';
+
+const SEVEN_DAYS = 60 * 60 * 24 * 7 * 1000;
 
 @Injectable()
 export class SslCertificatesService {
   private readonly logger = new Logger(SslCertificatesService.name);
+  private readonly NOTIFICATION_THRESHOLD = SEVEN_DAYS;
+  private readonly EXPIRATION_THRESHOLD = SEVEN_DAYS;
 
   constructor(
     private readonly crtshService: CrtshService,
     private readonly sslCertificatesRepository: SslCertificatesRepository,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   public async findAndInsertCertificatesForDomain(domainId: string): Promise<string[]> {
@@ -35,6 +41,9 @@ export class SslCertificatesService {
     this.logger.log(`Updating SSL certificates expiration for domain: ${domain.name} (ID: ${domain.id})`);
 
     const certificates = await this.sslCertificatesRepository.findCertificatesByDomainId(domain.id);
+    const notificationThresholdDate = new Date(new Date().getTime() - this.NOTIFICATION_THRESHOLD);
+    const expirationThresholdDate = new Date(new Date().getTime() + this.EXPIRATION_THRESHOLD);
+
     const certificateUpdatePromises = certificates.map(async (certificate) => {
       const expirationDate = await this.checkSslExpiration(certificate.hostname);
       if (certificate.expirationDate !== null && expirationDate === null) {
@@ -47,6 +56,34 @@ export class SslCertificatesService {
       // which I don't want to do at this moment, as this part is not performance critical
       await this.sslCertificatesRepository.updateCertificateExpirationDate(certificate.id, expirationDate);
       this.logger.log(`Updated expiration date for certificate: ${certificate.hostname}`);
+
+      const wasNotRecentlyNotified =
+        certificate.lastNotifiedAt === null || certificate.lastNotifiedAt < notificationThresholdDate;
+
+      if (!wasNotRecentlyNotified) {
+        this.logger.log(`Certificate ${certificate.hostname} was recently notified (at ${certificate.lastNotifiedAt})`);
+      }
+
+      const isExpiringSoon = expirationDate && expirationDate < expirationThresholdDate && expirationDate > new Date();
+
+      if (!isExpiringSoon) {
+        this.logger.log(`Certificate ${certificate.hostname} is not expiring soon (expires on ${expirationDate})`);
+      }
+
+      if (wasNotRecentlyNotified && isExpiringSoon) {
+        const { userId } = domain;
+        const expiresOn = expirationDate?.toISOString();
+        const expiresIn = expirationDate
+          ? Math.floor((expirationDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
+          : null;
+
+        this.logger.log(`Creating notification for certificate: ${certificate.hostname}`);
+        await this.notificationsService.createNotification(userId, {
+          message: `Certificate for ${certificate.hostname} is expiring on ${expiresOn} (${expiresIn} days)`,
+          topic: NotificationTopic.SSL_EXPIRATION,
+        });
+        await this.sslCertificatesRepository.updateLastNotifiedAt(certificate.id);
+      }
     });
 
     await Promise.all(certificateUpdatePromises);
