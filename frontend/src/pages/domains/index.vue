@@ -43,10 +43,10 @@ const loading = ref(false);
 const alertsStore = useAlertStore();
 
 const headers = [
-  { text: "Name", value: "name" },
-  { text: "Expiration Date", value: "expirationDate" },
-  { text: "Last Checked", value: "lastCheckedAt" },
-  { text: "Actions", value: "actions", align: "end", sortable: false },
+  { title: "Name", key: "name" },
+  { title: "Expiration Date", key: "expirationDate" },
+  { title: "Last Checked", key: "lastCheckedAt" },
+  { title: "Actions", key: "actions", align: "end", sortable: false },
 ] as const;
 
 const sortDomains = (a: Domain, b: Domain) => {

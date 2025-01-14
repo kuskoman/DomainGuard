@@ -19,9 +19,9 @@ defineProps<{
 }>();
 
 const headers = [
-  { text: "Hostname", value: "hostname" },
-  { text: "Expiration Date", value: "expirationDate" },
-  { text: "Last Checked", value: "lastCheckedAt" },
+  { title: "Hostname", key: "hostname" },
+  { title: "Expiration Date", key: "expirationDate" },
+  { title: "Last Checked", key: "lastCheckedAt" },
 ] as const;
 </script>
 
