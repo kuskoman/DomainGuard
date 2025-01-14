@@ -8,6 +8,10 @@ export class SslCertificatesRepository {
 
   constructor(private readonly dbService: DbService) {}
 
+  public async findAllDomains() {
+    return await this.dbService.domain.findMany();
+  }
+
   public async getExistingHostnames(allHostnames: string[]) {
     const result = await this.dbService.sslCertificate.findMany({
       where: {

@@ -11,7 +11,7 @@ export class DomainsService {
   private readonly logger = new Logger(DomainsService.name);
 
   constructor(
-    private readonly repository: DomainsRepository,
+    private readonly domainsRepository: DomainsRepository,
     private readonly expirationService: DomainsExpirationService,
     private readonly notificationsService: NotificationsService,
     private readonly sslCertificateService: SslCertificatesService,
@@ -19,7 +19,7 @@ export class DomainsService {
 
   public async create(name: string, userId: string) {
     const input: CreateDomainInput = { name, userId };
-    const domain = await this.repository.create(input);
+    const domain = await this.domainsRepository.create(input);
 
     this.logger.log(`Domain created: ${domain.name} (ID: ${domain.id}) for user ${userId}`);
 
@@ -36,7 +36,7 @@ export class DomainsService {
 
   public async findAllWithUser(userId: string) {
     const input: FindDomainsByUserInput = { userId };
-    return this.repository.findAllWithUser(input);
+    return this.domainsRepository.findAllWithUser(input);
   }
 
   public async findOneWithUser(id: string, userId: string) {
@@ -46,7 +46,7 @@ export class DomainsService {
   public async removeWithUser(id: string, userId: string) {
     const domain = await this.findDomainWithUserValidation(id, userId);
     this.logger.log(`Removing domain: ${domain.name} (ID: ${id}) for user ${userId}`);
-    return this.repository.removeWithUser({ id });
+    return this.domainsRepository.removeWithUser({ id });
   }
 
   public async updateDomainExpirationDateWithUser(id: string, userId: string) {
@@ -55,7 +55,7 @@ export class DomainsService {
   }
 
   public async findAll() {
-    return this.repository.findAll();
+    return this.domainsRepository.findAll();
   }
 
   public async findOne(id: string) {
@@ -65,7 +65,7 @@ export class DomainsService {
   public async remove(id: string) {
     const domain = await this.findDomainWithValidation(id);
     this.logger.log(`Removing domain: ${domain.name} (ID: ${id})`);
-    return this.repository.remove({ id });
+    return this.domainsRepository.remove({ id });
   }
 
   public async updateDomainExpirationDates(id: string) {
@@ -80,7 +80,7 @@ export class DomainsService {
       throw new UnprocessableEntityException('Could not get expiration date');
     }
 
-    const updatedDomain = await this.repository.updateExpirationMetadata({ id, ...expirationMetadata });
+    const updatedDomain = await this.domainsRepository.updateExpirationMetadata({ id, ...expirationMetadata });
 
     this.refreshDomainCertificates(updatedDomain).catch((error) =>
       this.logger.error(`Error updating SSL certificates: ${JSON.stringify(error)}`),
@@ -99,7 +99,7 @@ export class DomainsService {
       throw new UnprocessableEntityException('Id is required');
     }
 
-    const domain = await this.repository.findOne({ id });
+    const domain = await this.domainsRepository.findOne({ id });
     if (!domain) {
       throw new NotFoundException(`Domain with ID ${id} not found`);
     }
@@ -112,7 +112,7 @@ export class DomainsService {
       throw new UnprocessableEntityException('Id and userId are required');
     }
 
-    const domain = await this.repository.findOneWithUserWithCertificates({ id, userId });
+    const domain = await this.domainsRepository.findOneWithUserWithCertificates({ id, userId });
     if (!domain) {
       throw new NotFoundException(`Domain with ID ${id} not found for user ${userId}`);
     }

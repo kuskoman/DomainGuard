@@ -6,9 +6,10 @@ import { DomainsController } from './domains.controller';
 import { EncryptionModule } from '@src/encryption/encryption.module';
 import { DomainsRepository } from './domains.repository';
 import { NotificationsModule } from '@src/notifications/notifications.module';
+import { DomainsCronService } from './domains.cron.service';
 
 @Module({
-  providers: [DomainsService, DomainsRepository],
+  providers: [DomainsService, DomainsRepository, DomainsCronService],
   imports: [DomainsExpirationModule, SslCertificatesModule, EncryptionModule, NotificationsModule],
   controllers: [DomainsController],
 })
