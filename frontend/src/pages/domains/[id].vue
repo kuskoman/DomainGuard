@@ -10,7 +10,7 @@
       <v-divider></v-divider>
       <v-card-text v-if="domain">
         <DomainInfo :domain="domain" />
-        <DomainCertificates :certificates="domain.sslCertificates" />
+        <DomainCertificatesList :certificates="domain.sslCertificates" />
       </v-card-text>
       <v-card-text v-else class="d-flex flex-column align-center py-4">
         <v-progress-circular indeterminate color="primary" size="32" />
@@ -29,8 +29,6 @@ import { ref, onMounted, watch } from "vue";
 import { useRoute } from "vue-router";
 import { apiClient } from "@/api/client";
 import { AlertType, useAlertStore } from "@/stores/alerts";
-import DomainInfo from "@/components/domains/DomainInfo.vue";
-import DomainCertificates from "@/components/domains/DomainCertificates.vue";
 import type { Domain } from "@/api/interfaces/domains.responses";
 
 interface RouteParams {
