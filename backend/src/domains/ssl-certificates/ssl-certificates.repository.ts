@@ -44,6 +44,12 @@ export class SslCertificatesRepository {
     return certificates;
   }
 
+  public async findOne(certificateId: string) {
+    return await this.dbService.sslCertificate.findUniqueOrThrow({
+      where: { id: certificateId },
+    });
+  }
+
   public async updateLastNotifiedAt(certificateId: string, lastNotifiedAt: Date = new Date()) {
     this.logger.debug(`Updating last notified at for certificate: ${certificateId}`);
 

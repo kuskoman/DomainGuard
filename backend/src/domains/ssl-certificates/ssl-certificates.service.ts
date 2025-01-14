@@ -37,6 +37,10 @@ export class SslCertificatesService {
     return hostnames;
   }
 
+  public async findOne(id: string) {
+    return this.sslCertificatesRepository.findOne(id);
+  }
+
   public async updateCertificateExpirationDatesForDomain(domain: Domain): Promise<void> {
     this.logger.log(`Updating SSL certificates expiration for domain: ${domain.name} (ID: ${domain.id})`);
 
