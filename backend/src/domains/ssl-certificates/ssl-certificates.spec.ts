@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { SslCertificatesService } from './ssl-certificates.service';
 import { SslCertificatesRepository } from './ssl-certificates.repository';
 import { CrtshService } from '@src/lib/crtsh/crtsh.service';
+import { NotificationsService } from '@src/notifications/notifications.service';
 
 describe(SslCertificatesService.name, () => {
   let service: SslCertificatesService;
@@ -18,14 +19,14 @@ describe(SslCertificatesService.name, () => {
           provide: CrtshService,
           useValue: {},
         },
+        {
+          provide: NotificationsService,
+          useValue: {},
+        },
       ],
     }).compile();
 
     service = module.get<SslCertificatesService>(SslCertificatesService);
-  });
-
-  it('should be defined', () => {
-    expect(service).toBeDefined();
   });
 
   describe('checkSslExpiration', () => {

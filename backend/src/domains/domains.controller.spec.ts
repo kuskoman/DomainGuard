@@ -82,6 +82,7 @@ const testDomain = {
   id: '1',
   name: 'example.com',
   userId: 'test-user-id',
+  lastNotifiedAt: new Date(),
 };
 
 const testDomainWithCertificates = {
@@ -95,6 +96,7 @@ const testDomainWithCertificates = {
       hostname: 'example.com',
       createdAt: new Date(),
       updatedAt: new Date(),
+      lastNotifiedAt: new Date(),
     },
   ],
 };
