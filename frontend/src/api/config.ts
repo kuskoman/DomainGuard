@@ -1,1 +1,3 @@
-export const BASE_URL = "http://localhost:3000";
+import { getEnv } from "@/utils/envHelper";
+
+export const BASE_URL = getEnv("API_URL");
