@@ -2,6 +2,7 @@
   "name": "domainguard",
   "version": "0.1.0",
   "repository": "git@github.com:kuskoman/DomainGuard.git",
+  "private": true,
   "author": "Jakub Surdej <kubasurdej@gmail.com>",
   "devDependencies": {
     "@commitlint/cli": "^19.2.0",
