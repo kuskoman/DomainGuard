@@ -1,0 +1,16 @@
+{
+  "name": "domainguard",
+  "version": "0.1.0",
+  "repository": "git@github.com:kuskoman/DomainGuard.git",
+  "author": "Jakub Surdej <kubasurdej@gmail.com>",
+  "devDependencies": {
+    "@commitlint/cli": "^19.2.0",
+    "@commitlint/config-conventional": "^19.1.0",
+    "conventional-recommended-bump": "^10.0.0",
+    "husky": "^9.0.11",
+    "standard-version": "^9.5.0"
+  },
+  "scripts": {
+    "release": "standard-version -a"
+  }
+}
