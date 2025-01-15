@@ -11,6 +11,7 @@
     "standard-version": "^9.5.0"
   },
   "scripts": {
-    "release": "standard-version -a"
+    "release": "standard-version -a --no-verify",
+    "prepare": "husky"
   }
 }
