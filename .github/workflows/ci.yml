@@ -1,0 +1,60 @@
+name: Fullstack Application CI/CD
+
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - "v*"
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        project: [backend, frontend]
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 22
+
+      - name: Install Dependencies
+        run: yarn --frozen-lockfile
+        working-directory: ${{ matrix.project }}
+
+      - name: Run Tests
+        run: yarn test
+        working-directory: ${{ matrix.project }}
+
+  build:
+    name: Build Docker Images
+    runs-on: ubuntu-latest
+    needs: test
+    strategy:
+      matrix:
+        project: [backend, frontend]
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Push Docker Image
+        run: |
+          docker build -t ghcr.io/${{ github.repository }}/${{ matrix.project }}:${{ github.sha }} ${{ matrix.project }}
+          docker push ghcr.io/${{ github.repository }}/${{ matrix.project }}:${{ github.sha }}
+        env:
+          DOCKER_BUILDKIT: 1
