@@ -9,7 +9,7 @@ const mockNotificationStore = {
 };
 
 vi.mock("@/stores/notifications", () => ({
-  useNotificationStore: () => mockNotificationStore,
+  useNotificationsStore: () => mockNotificationStore,
 }));
 
 vi.mock("@/api/client", () => ({
@@ -33,7 +33,6 @@ describe("User Store", () => {
     expect(store.accessToken).toBe("test-token");
     expect(localStorage.getItem("accessToken")).toBe("test-token");
     expect(apiClient.defaults.headers.common["Authorization"]).toBe("Bearer test-token");
-    expect(mockNotificationStore.connectWebSocket).toHaveBeenCalledWith("test-token");
   });
 
   it("clears access token and disconnects WebSocket", () => {

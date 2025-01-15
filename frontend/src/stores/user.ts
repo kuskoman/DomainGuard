@@ -1,6 +1,5 @@
 import { defineStore } from "pinia";
 import { apiClient } from "@/api/client";
-import { connectWebSocket } from "@/api/websocket";
 import { useNotificationsStore } from "./notifications";
 
 export const useUserStore = defineStore("user", {
