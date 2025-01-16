@@ -54,7 +54,8 @@ jobs:
 
       - name: Build and Push Docker Image
         run: |
-          docker build -t ghcr.io/${{ github.repository }}/${{ matrix.project }}:${{ github.sha }} ${{ matrix.project }}
-          docker push ghcr.io/${{ github.repository }}/${{ matrix.project }}:${{ github.sha }}
+          REPO_NAME=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          docker build -t ghcr.io/${REPO_NAME}/${{ matrix.project }}:${{ github.sha }} ${{ matrix.project }}
+          docker push ghcr.io/${REPO_NAME}/${{ matrix.project }}:${{ github.sha }}
         env:
           DOCKER_BUILDKIT: 1
