@@ -1,7 +1,7 @@
 {
-  "commitUrlFormat": "https://github.com/kuskoman/project-management-app-vue/commit/{{hash}}",
-  "compareUrlFormat": "https://github.com/kuskoman/project-management-app-vue/compare/{{previousTag}}...{{currentTag}}",
-  "issueUrlFormat": "https://github.com/kuskoman/project-management-app-vue/issues/{{id}}",
+  "commitUrlFormat": "https://github.com/kuskoman/DomainGuard/commit/{{hash}}",
+  "compareUrlFormat": "https://github.com/kuskoman/DomainGuard/compare/{{previousTag}}...{{currentTag}}",
+  "issueUrlFormat": "https://github.com/kuskoman/DomainGuard/issues/{{id}}",
   "userUrlFormat": "https://github.com/{{user}}",
   "types": [
     { "type": "feat", "section": "Features" },
