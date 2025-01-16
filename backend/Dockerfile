@@ -18,7 +18,6 @@ RUN yarn install --frozen-lockfile
 COPY . .
 
 RUN yarn build
-RUN rm dist/tsconfig.build.tsbuildinfo
 
 
 FROM base AS release
