@@ -1,4 +1,4 @@
-FROM node:21.5-alpine3.19 as base
+FROM node:23.6.0-alpine3.20 AS base
 
 WORKDIR /app
 
@@ -6,12 +6,12 @@ COPY package.json package.json
 COPY yarn.lock yarn.lock
 
 
-FROM base as modules
+FROM base AS modules
 
 RUN yarn install --production=true --frozen-lockfile
 
 
-FROM base as build
+FROM base AS build
 
 RUN yarn install --frozen-lockfile
 
@@ -21,7 +21,7 @@ RUN yarn build
 RUN rm dist/tsconfig.build.tsbuildinfo
 
 
-FROM base as release
+FROM base AS release
 
 COPY --from=build /app/dist /app/dist
 COPY --from=modules /app/node_modules /app/node_modules
